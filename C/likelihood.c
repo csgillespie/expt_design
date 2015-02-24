@@ -145,7 +145,7 @@ double get_utility(gsl_rng *r,
   utilty = get_moment(3, moments)*get_moment(4, moments)-
                   get_moment(5,moments)*get_moment(5,moments);
 
-
+  //  printf("%f\n", 1.0*no_of_accepts/i);
   free(pars);
   free(moments);
     
@@ -163,11 +163,12 @@ void *threadSimulation(void *arg) {
 
   /* other variables */
   int i;
-  thread->utility = 0;
+  thread->utility = 1;
   for(i=0; i<no_sims; i++) {
     sample_priors(r, sim_data->pars); /*Sample and update */
-    forwardSim(r, sim_data); /*New simulation */
-    thread->utility += get_utility(r, gsl_ode, sim_data);
+    //    forwardSim(r, sim_data); /*New simulation */
+    odeSim(gsl_ode, sim_data);
+    thread->utility *= get_utility(r, gsl_ode, sim_data);
   }
   //  printf("U: %d, %f\n", thread->thread_id, thread->utility);
   pthread_exit(NULL);

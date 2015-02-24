@@ -84,14 +84,15 @@ int inferTime(int no_d, int no_threads) {
   int accept = 1;
   int N = 10000;
   int power_up;
-  int no_tps =no_d;
+  int no_tps =2;
+  times->n = no_tps;
  
   gsl_matrix *prop_particles = gsl_matrix_alloc(N, no_d);
   gsl_matrix *cur_particles = gsl_matrix_alloc(N, no_d);
   
   for(i=0; i<10; i++){
     util->cur = GSL_NEGINF;
-    power_up = pow(i+3, 2);
+    power_up = pow(i+7, 2);
     /*Distribute sims among threads */
     for(k=0; k<no_threads; k++) {
       thread = parallel->thread_pts[k];
@@ -109,14 +110,14 @@ int inferTime(int no_d, int no_threads) {
 			 threadSimulation, (void *) threads[k]);
 	}
 
-	util->prop = 0;       
+	util->prop = 1;       
 	for(k=0; k<no_threads; k++) {
 	  rc = pthread_join(*(threads[k]->a_thread), NULL);
 	  if(rc != 0){
 	    printf("1.join error %d\n", rc);
 	    exit(1);
 	  }
-	  util->prop += threads[k]->utility;
+	  util->prop *= threads[k]->utility;
 	  //        printf("util %f\n", util->prop);
 	}
       }

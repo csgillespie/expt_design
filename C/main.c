@@ -28,7 +28,7 @@
 int main(int argc, char *argv[])
 {
   int no_d = 6; /* includes time t= 0*/
-  int no_threads = 20;
+  int no_threads = 4;
  
   inferTime(no_d, no_threads);
  
