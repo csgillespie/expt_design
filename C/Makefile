@@ -14,6 +14,9 @@ OBJECTS += prior.o inference.o
 LDFLAGS =  -lgsl -lgslcblas -lm -lpthread
 FILE=main
 
+#SHELL = /bin/bash
+#.SHELLFLAGS = -e
+
 
 
 $(FILE): $(OBJECTS) $(FILE).c
@@ -22,8 +25,18 @@ $(FILE): $(OBJECTS) $(FILE).c
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< $(DEBUG)
 
+load:
+	module load gsl/1.16
+	module load gcc/4.9.2
+
 run: $(FILE)
 	./$(FILE)
+
+submit:
+	qsub myscript.qsub
+
+copy:
+	scp parts_*.csv clyde:/tmp/
 
 clean:
 	rm -fv *.o *.tab *~ $(FILE)
@@ -31,3 +44,4 @@ clean:
 cleaner:
 	make clean
 	rm -fvr tmp.csv parts_?.csv
+	rm -fvr *.qsub.*

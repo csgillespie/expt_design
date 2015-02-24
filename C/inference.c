@@ -82,7 +82,7 @@ int inferTime(int no_d, int no_threads) {
   }
   //get_utility(r, gsl_ode, sim_data, GSL_POSINF);  //GSL_POSINF
   int accept = 1;
-  int N = 1000;
+  int N = 10000;
   int power_up;
   int no_tps =no_d;
  
@@ -91,7 +91,7 @@ int inferTime(int no_d, int no_threads) {
   
   for(i=0; i<10; i++){
     util->cur = GSL_NEGINF;
-    power_up = pow(i+5, 2);
+    power_up = pow(i+3, 2);
     /*Distribute sims among threads */
     for(k=0; k<no_threads; k++) {
       thread = parallel->thread_pts[k];
@@ -100,23 +100,25 @@ int inferTime(int no_d, int no_threads) {
 
     for(j=0; j<N; j++) {
       accept = 1;
-      //  accept = propose_tps(r, times, prop_particles, i);
+      accept = propose_tps(r, times, prop_particles, i);
 
-      for(k=0; k<no_threads; k++) {
-        updateSimTimes(threads[k]->sim_data, times->prop);
-        pthread_create(threads[k]->a_thread, NULL, 
-                       threadSimulation, (void *) threads[k]);
-      }
+      if(accept > 0.5){
+	for(k=0; k<no_threads; k++) {
+	  updateSimTimes(threads[k]->sim_data, times->prop);
+	  pthread_create(threads[k]->a_thread, NULL, 
+			 threadSimulation, (void *) threads[k]);
+	}
 
-      util->prop = 0;       
-      for(k=0; k<no_threads; k++) {
-        rc = pthread_join(*(threads[k]->a_thread), NULL);
-        if(rc != 0){
-          printf("1.join error %d\n", rc);
-          exit(1);
-        }
-        util->prop += threads[k]->utility;
-        //        printf("util %f\n", util->prop);
+	util->prop = 0;       
+	for(k=0; k<no_threads; k++) {
+	  rc = pthread_join(*(threads[k]->a_thread), NULL);
+	  if(rc != 0){
+	    printf("1.join error %d\n", rc);
+	    exit(1);
+	  }
+	  util->prop += threads[k]->utility;
+	  //        printf("util %f\n", util->prop);
+	}
       }
 
       u = gsl_rng_uniform(r);  
