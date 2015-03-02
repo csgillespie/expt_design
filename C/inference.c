@@ -60,7 +60,7 @@ st_mcmc_npar *init_times(int no_d)
   return(times);
 }
 
-void *update_thread_times(st_thread **threads, double *times, int no_threads)
+void update_thread_times(st_thread **threads, double *times, int no_threads)
 {
   int k;
   for(k=0; k<no_threads; k++){
