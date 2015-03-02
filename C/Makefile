@@ -14,8 +14,8 @@ OBJECTS += prior.o inference.o
 LDFLAGS =  -lgsl -lgslcblas -lm -lpthread
 FILE=main
 
-#SHELL = /bin/bash
-#.SHELLFLAGS = -e
+SHELL = /bin/bash
+.SHELLFLAGS = -e
 
 
 
@@ -32,6 +32,11 @@ load:
 run: $(FILE)
 	./$(FILE)
 
+
+# build:
+# 	make clean 
+# 	make load
+# 	make $(MAIN)
 submit:
 	qsub myscript.qsub
 
