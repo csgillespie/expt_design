@@ -13,6 +13,7 @@ typedef struct
   st_gsl_ode *gsl_ode_pt;
   gsl_rng *gsl_rng_pt;/*RNG for each thread */
   st_sim_data *sim_data; /*Struct for storing simulations */
+  int level; /*approximation level */
   double utility;
 } st_thread;
 

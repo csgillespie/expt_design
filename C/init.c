@@ -1,12 +1,13 @@
 #include <stdlib.h>
 /* Used for random seeds */
-#include <time.h> 
-#include <unistd.h>
+
+
+#include <gsl/gsl_math.h>
 
 #include <gsl/gsl_math.h> /*GSL_POSINF*/
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <gsl/gsl_odeiv.h>
+#include <gsl/gsl_odeiv2.h>
 #include <pthread.h> /*Thread library*/
 #include <semaphore.h> /*Thread library*/
 
@@ -44,11 +45,12 @@ st_gsl_ode *initGSLODE(st_sim_data *sim_data)
   st_gsl_ode *gsl_ode;
 
   gsl_ode = (st_gsl_ode *) malloc(sizeof(st_gsl_ode));
-  gsl_ode->T = gsl_odeiv_step_gear2;
-  gsl_ode->stp =  gsl_odeiv_step_alloc(gsl_ode->T, 5);
-  gsl_ode->c =  gsl_odeiv_control_y_new(1e-4, 0.0);
-  gsl_ode->e = gsl_odeiv_evolve_alloc(5);
-  gsl_odeiv_system sys = {func, 0, 5, sim_data->pars};
+   gsl_ode->T = gsl_odeiv2_step_rkf45;//gsl_odeiv_step_gear2;
+  // gsl_ode->T = gsl_odeiv_step_gear2;
+  gsl_ode->stp =  gsl_odeiv2_step_alloc(gsl_ode->T, 5);
+  gsl_ode->c =  gsl_odeiv2_control_y_new(1e-5, 0.0);
+  gsl_ode->e = gsl_odeiv2_evolve_alloc(5);
+  gsl_odeiv2_system sys = {func, 0, 5, sim_data->pars};
  
   gsl_ode->sys = sys;
   return(gsl_ode);
@@ -75,8 +77,10 @@ st_parallel *init_parallel(int no_threads, int no_d)
 {
   int i;
   st_parallel *parallel = (st_parallel *)  malloc(sizeof(st_parallel)); 
-  st_thread **thread_pts =  (st_thread **) malloc(no_threads*sizeof(st_thread *));
+  st_thread **thread_pts = (st_thread **)malloc(no_threads*sizeof(st_thread *)); 
+  time_t t;
 
+  srand((unsigned) time(&t));
   for(i=0; i<no_threads; i++) {
     /*Init*/
     thread_pts[i] = (st_thread *) malloc(sizeof(st_thread));
@@ -90,13 +94,15 @@ st_parallel *init_parallel(int no_threads, int no_d)
    
     /*RNG */
     thread_pts[i]->gsl_rng_pt =  gsl_rng_alloc(gsl_rng_mt19937); 
-    gsl_rng_set(thread_pts[i]->gsl_rng_pt, i);
+    gsl_rng_set(thread_pts[i]->gsl_rng_pt, rand());
 
     /*Init sim data struct */
     thread_pts[i]->sim_data = initSimData(no_d);
     /* ODE */
     thread_pts[i]->gsl_ode_pt = initGSLODE(thread_pts[i]->sim_data);
 
+    /*Approximation level */
+    thread_pts[i]->level = 0;
     /* Utility */
     thread_pts[i]->utility = GSL_NEGINF;
   }

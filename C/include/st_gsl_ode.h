@@ -4,9 +4,9 @@
 */
 typedef struct
 {
-  const gsl_odeiv_step_type *T;
-  gsl_odeiv_step *stp;
-  gsl_odeiv_control *c;
-  gsl_odeiv_evolve *e;
-  gsl_odeiv_system sys;
+  const gsl_odeiv2_step_type *T;
+  gsl_odeiv2_step *stp;
+  gsl_odeiv2_control *c;
+  gsl_odeiv2_evolve *e;
+  gsl_odeiv2_system sys;
 } st_gsl_ode;

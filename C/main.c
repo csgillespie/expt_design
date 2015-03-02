@@ -9,28 +9,15 @@
 #include <pthread.h> /*Thread library*/
 #include <semaphore.h> /*Thread library*/
 
-
-/* #include "include/st_moments.h"
- * #include "include/st_gsl_ode.h"
- * #include "include/st_mcmc_par.h"
- * #include "include/st_parallel.h" */
-
-
-/* #include "include/init.h"
- * #include "include/simulation.h"
- * #include "include/likelihood.h" */
 #include "include/inference.h"
-
-/* #include "include/print.h"
- * #include "include/update.h"
- * #include "include/prior.h" */
 
 int main(int argc, char *argv[])
 {
-  int no_d = 6; /* includes time t= 0*/
+  int no_d = 3; /* includes time t= 0*/
   int no_threads = 4;
+  int N = 10;
  
-  inferTime(no_d, no_threads);
+  mcmc(no_d, no_threads, N);
  
   return(GSL_SUCCESS);
 }

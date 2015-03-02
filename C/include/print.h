@@ -1,2 +1,4 @@
-void printSimData(st_sim_data *sim_data);
-void saveParticles(gsl_matrix *particles, int i);
+void print_mcmc_status(int j, int no_d, double power_up, 
+                       double *times, st_mcmc_1par *util,
+                       double no_accept);
+void print_times(double *times, int no_d, int nl);

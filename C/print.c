@@ -4,14 +4,43 @@
 
 #include <gsl/gsl_matrix.h>
 #include "include/st_sim_data.h"
+#include "include/st_mcmc_par.h"
 
-void printSimData(st_sim_data *sim_data) 
+void add_newline(int nl)
+{
+  if(nl == 1)
+    printf("\n");
+}
+
+/* Public */
+
+void print_sim_pars(st_sim_data *sim_data, int nl) 
+{
+  int i;
+  for(i=0; i<2; i++)
+    printf("%f,\n", sim_data->pars[i]);
+  add_newline(nl);
+
+}
+
+
+void print_times(double *times, int no_d, int nl) 
+{
+
+  int i;
+  for(i=0; i<no_d; i++) 
+    printf("%.0f,", times[i]);
+  add_newline(nl);
+
+}
+
+void print_sim_n(st_sim_data *sim_data, int nl) 
 {
   int i;
   int no_d = sim_data->no_d;
 
-  printf("%f, %f\n", 
-         sim_data->pars[0], sim_data->pars[1]);
+  for(i=0; i<2; i++)
+    printf("%f,\n", sim_data->pars[i]);
   
   for(i=0; i< 5; i++) {
     printf("%3.1f, %3.1f\n", sim_data->n[i], sim_data->c[i]);
@@ -21,30 +50,30 @@ void printSimData(st_sim_data *sim_data)
     printf("%3.2f, %3.3f\n", sim_data->t[i], sim_data->t_diff[i]);
   }
   printf("%3.3f\n", sim_data->t[no_d-1]);
-
 }
 
-void saveParticles(gsl_matrix *particles, int i) {
-
-  /*Assume max 50 characters file name */
-  char fname[50], buffer [40];
-
-  strcpy(fname, "parts_");
-  sprintf(buffer, "%d", i);
-  strcat(fname, buffer);
-  strcat(fname, ".csv");
-
-  int j, k;
-  FILE *fp;
-  fp = fopen(fname, "w");
-
-  for(j=0; j<particles->size1; j++) {
-    for(k=0; k<(particles->size2-1); k++) {
-      fprintf(fp, "%d,", (int) gsl_matrix_get(particles, j, k));
-    }
-    fprintf(fp, "%d\n", (int) gsl_matrix_get(particles, j, particles->size2-1));
-  }
-
-  fclose(fp);
-
+void print_utils(st_mcmc_1par *util, int nl)
+{
+  printf("%f,%f", util->cur, util->prop);
+  add_newline(nl);
 }
+
+void print_accept(int j, double no_accept, int nl) 
+{
+  printf("%.0f", no_accept*100.0/(j+1));
+  add_newline(nl);
+}
+
+void print_mcmc_status(int j, int no_d, double power_up, 
+                         double *times, st_mcmc_1par *util,
+                       double no_accept)
+{
+  printf("%d,%.0f,", j, power_up);
+  print_times(times, no_d, 0);
+  print_utils(util, 0);
+  printf(",");
+  print_accept(j, no_accept, 0);
+
+  add_newline(1);
+}
+

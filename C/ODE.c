@@ -1,6 +1,6 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <gsl/gsl_odeiv.h>
+#include <gsl/gsl_odeiv2.h>
 #include <pthread.h> /*Thread library*/
 #include <semaphore.h> /*Thread library*/
 
@@ -26,10 +26,10 @@ int ode(st_gsl_ode *gsl_ode, st_sim_data *sim_data, int i)
 {
 
   //  const gsl_odeiv_step_type *T = gsl_ode->T;
-  gsl_odeiv_step *stp = gsl_ode->stp;
-  gsl_odeiv_control *c = gsl_ode->c;
-  gsl_odeiv_evolve *e = gsl_ode->e;
-  gsl_odeiv_system sys = gsl_ode->sys;
+  gsl_odeiv2_step *stp = gsl_ode->stp;
+  gsl_odeiv2_control *c = gsl_ode->c;
+  gsl_odeiv2_evolve *e = gsl_ode->e;
+  gsl_odeiv2_system sys = gsl_ode->sys;
 
   double t = 0.0;
   double maxtime = sim_data->t_diff[i];
@@ -40,7 +40,7 @@ int ode(st_gsl_ode *gsl_ode, st_sim_data *sim_data, int i)
   double h = 1e-6;
 
   while (t < maxtime) {
-    gsl_odeiv_evolve_apply (e, c, stp, &sys, &t, maxtime, &h, sps);
+    gsl_odeiv2_evolve_apply (e, c, stp, &sys, &t, maxtime, &h, sps);
   }
 
   //printf("%f, %f, %f, %f, %f\n", sps[0], sps[1], sps[2], sps[3], sps[4]);
