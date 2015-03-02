@@ -1,0 +1,12 @@
+# !bin/bash/ 
+#
+#$ -cwd                 
+#$ -S /bin/bash
+#$ -pe threaded 20      # 10 slots required on a single node 
+
+# The following setmodule load mas-openmpi
+module load gcc/4.9.2
+module load gsl/1.16
+    
+./main
+

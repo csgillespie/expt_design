@@ -15,9 +15,9 @@ LDFLAGS =  -lgsl -lgslcblas -lm -lpthread
 FILE=main
 
 #SHELL = /bin/bash
-#.SHELLFLAGS = -e
+.SHELLFLAGS = -e
 
-
+SHELL=/bin/bash -l 
 
 $(FILE): $(OBJECTS) $(FILE).c
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(FILE) $(FILE).c $(LDFLAGS) $(DEBUG)
@@ -32,8 +32,15 @@ load:
 run: $(FILE)
 	./$(FILE)
 
+
+# build:
+# 	make clean 
+# 	make load
+# 	make $(MAIN)
 submit:
-	qsub myscript.qsub
+	make clean
+	make $(FILE)
+	qsub submit.qsub
 
 copy:
 	scp parts_*.csv clyde:/tmp/
