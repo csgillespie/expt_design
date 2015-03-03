@@ -14,24 +14,32 @@ void add_newline(int nl)
 
 /* Public */
 
+void print_options(int no_d, int no_threads, int N, 
+                   int max_levels, double *levels) 
+{
+  int i;
+  printf("d:%d, t:%d, N:%d, l:%d\n", no_d, no_threads, N, max_levels);
+  for(i=0; i<max_levels; i++)
+    printf("%.0f ", levels[i]);
+  add_newline(1);
+}
+
+
 void print_sim_pars(st_sim_data *sim_data, int nl) 
 {
   int i;
   for(i=0; i<2; i++)
     printf("%f,\n", sim_data->pars[i]);
   add_newline(nl);
-
 }
 
 
 void print_times(double *times, int no_d, int nl) 
 {
-
   int i;
   for(i=0; i<no_d; i++) 
     printf("%.0f,", times[i]);
   add_newline(nl);
-
 }
 
 void print_sim_n(st_sim_data *sim_data, int nl) 

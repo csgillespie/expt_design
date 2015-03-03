@@ -69,12 +69,14 @@ void update_thread_times(st_thread **threads, double *times, int no_threads)
   }
 }
 
+
 /* Public */
-int mcmc(int no_d, int no_threads, int N) {
+int mcmc(int no_d, int no_threads, int N, 
+         int max_levels, double *levels) {
 
   int i, j, k;
   int rc, no_sims, accept = 1;
-  int no_accept, level=0;
+  int no_accept;
   double u, compare_tp, power_up;
 
   st_parallel *parallel = init_parallel(no_threads, no_d);
@@ -93,20 +95,15 @@ int mcmc(int no_d, int no_threads, int N) {
 
   /* Initialise var_prop */
   update_thread_times(threads, times->cur, no_threads);
- 
 
-  int max_power_up=7;
-  int levels[8] = {0, 0, 1, 2, 2, 2, 2};
-
-  for(i=0; i<max_power_up; i++){
+  for(i=0; i<max_levels; i++){
     util->cur = GSL_NEGINF;
     power_up = i+1;//pow(2, i);
     
-    level = levels[i];
     /*Distribute sims among threads */
     for(k=0; k<no_threads; k++) {
       thread = parallel->thread_pts[k];
-      thread->no_sims = get_num_sims(k, no_threads, power_up, level);
+      thread->no_sims = get_num_sims(k, no_threads, power_up, levels[i]);
     }
     no_accept = 0;
 
@@ -122,7 +119,6 @@ int mcmc(int no_d, int no_threads, int N) {
           k++;
           no_sims = threads[k]->no_sims;
 	}
-      
 
 	util->prop = 0;       
         k=0; no_sims = threads[k]->no_sims;
@@ -147,16 +143,18 @@ int mcmc(int no_d, int no_threads, int N) {
         no_accept++;
       }
       update_particles(j, cur_particles, times->cur, util->cur);
-      
       print_mcmc_status(j, no_d, power_up, times->cur,
                         util, no_accept);
-
     }
     save_particles(cur_particles, i);
     swap_particles(&prop_particles, &cur_particles);
    }
+
+  /* Memory management is almost non-existant :(
+   * Just clean up after the programme ends 
+   */
   gsl_matrix_free(cur_particles);
   gsl_matrix_free(prop_particles);
- 
+  free(levels);
   return(GSL_SUCCESS); 
 }
