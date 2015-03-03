@@ -72,7 +72,7 @@ void update_thread_times(st_thread **threads, double *times, int no_threads)
 
 /* Public */
 int mcmc(int no_d, int no_threads, int N, 
-         int max_levels, double *levels) {
+         int max_levels, double *levels, int verbose) {
 
   int i, j, k;
   int rc, no_sims, accept = 1;
@@ -143,8 +143,9 @@ int mcmc(int no_d, int no_threads, int N,
         no_accept++;
       }
       update_particles(j, cur_particles, times->cur, util->cur);
-      print_mcmc_status(j, no_d, power_up, times->cur,
-                        util, no_accept);
+      if(verbose)
+        print_mcmc_status(j, no_d, power_up, times->cur,
+                          util, no_accept);
     }
     save_particles(cur_particles, i);
     swap_particles(&prop_particles, &cur_particles);

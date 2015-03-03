@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
   if(verbose == 1)
     print_options(no_d, no_threads, N, max_levels, levels);
-  mcmc(no_d, no_threads, N, max_levels, levels);
+  mcmc(no_d, no_threads, N, max_levels, levels, verbose);
   return(GSL_SUCCESS);
 }
 
