@@ -90,11 +90,8 @@ int propose_tps (gsl_rng *r, st_mcmc_npar *times,
     row = pick_row(r, prop_particles->size1);
     sample_row(row, times, prop_particles);
   } else {
-    /* XXX: CHANGE */
-    while(accept < 0.5) {
-      perturb_tps(r, times);
-      accept = check_tps(times);
-    }
+    perturb_tps(r, times);
+    accept = check_tps(times);
   }
   accept = check_tps(times);
   return(accept);

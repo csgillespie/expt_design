@@ -52,11 +52,11 @@ st_mcmc_npar *init_times(int no_d)
 {
   int i;
   st_mcmc_npar *times = initMCMCnPar(no_d);
-  times->cur[0] = 0;  times->cur[1] = 17; times->cur[2] = 30;
-  //  times->cur[3] = 42;// times->cur[4] = 42; //times->cur[5] = 42;
 
-  for(i=0; i<no_d; i++)
+  for(i=0; i<no_d; i++) {
+    times->cur[i] = (int) (i*49.0/no_d);
     times->prop[i] = times->cur[i];
+  }
   return(times);
 }
 
@@ -100,7 +100,7 @@ int mcmc(int no_d, int no_threads, int N) {
 
   for(i=0; i<max_power_up; i++){
     util->cur = GSL_NEGINF;
-    power_up = i+3;//pow(2, i);
+    power_up = i+1;//pow(2, i);
     
     level = levels[i];
     /*Distribute sims among threads */

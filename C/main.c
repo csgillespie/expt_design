@@ -13,9 +13,9 @@
 
 int main(int argc, char *argv[])
 {
-  int no_d = 3; /* includes time t= 0*/
+  int no_d = 4; /* includes time t= 0*/
   int no_threads = 4;
-  int N = 10;
+  int N = 10000;
  
   mcmc(no_d, no_threads, N);
  

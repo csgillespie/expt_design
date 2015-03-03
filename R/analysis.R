@@ -23,10 +23,15 @@ for(i in 1:length(f)){
 
 #setnicepar(mfrow=c(2, 3))
 for(i in 1:length(f)){
-  hist(l[[i]]$V4/(i+2), xlab="Utility", main=NULL, freq=FALSE, breaks="fd", 
-       xlim=c(35.5, 38), ylim=c(0, 3) )
+  
+  hist(l[[i]]$V4, xlab=expression(t[3]), main=NULL, freq=FALSE, breaks="fd", 
+       xlim=c(28, 47))
 }
-
+  
+setnicepar(mfrow=c(1, 2))
+for(i in 1:length(f)){
+  hist(l[[i]]$V5/i, main=NULL, freq=FALSE, breaks="fd")
+}
 
 
 
