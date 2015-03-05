@@ -95,10 +95,14 @@ int mcmc(int no_d, int no_threads, int N,
   gsl_matrix *prop_particles = gsl_matrix_alloc(N, no_d+1);
   gsl_matrix *cur_particles = gsl_matrix_alloc(N, no_d+1);
   double max_wts = 1;
-  double *wts = malloc(N*sizeof(double));
-  for(i=0; i<N; i++) wts[i] = 1;
+  double *wts_cur = malloc(N*sizeof(double));
+  double *wts_prop = malloc(N*sizeof(double));
+  for(i=0; i<N; i++) {
+    wts_cur[i] = 1;
+    wts_prop[i] = 1;
+  }
 
-  gsl_ran_discrete_t *g = gsl_ran_discrete_preproc(N, (const double *) wts);
+  gsl_ran_discrete_t *g = gsl_ran_discrete_preproc(N, (const double *) wts_cur);
   
   st_mcmc_npar *times = init_times(no_d);
   st_mcmc_1par *util = initMCMC1Par();
@@ -144,9 +148,9 @@ int mcmc(int no_d, int no_threads, int N,
       }
     
       u = gsl_rng_uniform(r);  
-      compare_tp = log(u) + util->cur + log(wts[row_cur]) -log(wts[row_prop]);
+      compare_tp = log(u) + util->cur + log(wts_cur[row_prop])  ;
      
-      if(util->prop > compare_tp && accept > 0.5) {
+      if(util->prop + log(wts_cur[row_cur])> compare_tp && accept > 0.5) {
         util->cur = util->prop; row_cur = row_prop;
         for(k=1; k<(no_d); k++) {
           times->cur[k] = times->prop[k];
@@ -155,8 +159,8 @@ int mcmc(int no_d, int no_threads, int N,
       }
      
       update_particles(j, cur_particles, times->cur, util->cur);
-      wts[j] = util->cur;
-      if(wts[j] > max_wts) max_wts = wts[j];
+      wts_prop[j] = util->cur;
+      if(wts_prop[j] > max_wts) max_wts = wts_prop[j];
       if(verbose)
         print_mcmc_status(j, no_d, power_up, times->cur,
                           util, no_accept);
@@ -165,11 +169,12 @@ int mcmc(int no_d, int no_threads, int N,
     save_particles(cur_particles, i);
     gsl_ran_discrete_free(g);
     for(j=0; j<N; j++) {
-      wts[j] = wts[j] - max_wts;
-      wts[j] = exp(wts[j]);
-      wts[j] = pow(wts[j], (power_up + 1.0)/power_up);
+      wts_prop[j] = wts_prop[j] - max_wts;
+      wts_prop[j] = exp(wts_prop[j]);
+      wts_prop[j] = pow(wts_prop[j], (power_up + 1.0)/power_up);
+      wts_cur[j] = wts_prop[k];
     }
-    g = gsl_ran_discrete_preproc(N, (const double *) wts);
+    g = gsl_ran_discrete_preproc(N, (const double *) wts_prop);
 
     swap_particles(&prop_particles, &cur_particles);
    }
@@ -181,5 +186,7 @@ int mcmc(int no_d, int no_threads, int N,
   gsl_matrix_free(cur_particles);
   gsl_matrix_free(prop_particles);
   free(levels);
+  free(wts_prop);
+  free(wts_cur);
   return(GSL_SUCCESS); 
 }
