@@ -69,6 +69,9 @@ void update_thread_times(st_thread **threads, double *times, int no_threads)
   }
 }
 
+void int_test(int *row) {
+  row[0] = 10;
+}
 
 /* Public */
 int mcmc(int no_d, int no_threads, int N, 
@@ -77,6 +80,7 @@ int mcmc(int no_d, int no_threads, int N,
   int i, j, k;
   int rc, no_sims, accept = 1;
   int no_accept;
+  int row_prop=0, row_cur=0;
   double u, compare_tp, power_up;
 
   st_parallel *parallel = init_parallel(no_threads, no_d);
@@ -90,6 +94,12 @@ int mcmc(int no_d, int no_threads, int N,
 
   gsl_matrix *prop_particles = gsl_matrix_alloc(N, no_d+1);
   gsl_matrix *cur_particles = gsl_matrix_alloc(N, no_d+1);
+  double max_wts = 1;
+  double *wts = malloc(N*sizeof(double));
+  for(i=0; i<N; i++) wts[i] = 1;
+
+  gsl_ran_discrete_t *g = gsl_ran_discrete_preproc(N, (const double *) wts);
+  
   st_mcmc_npar *times = init_times(no_d);
   st_mcmc_1par *util = initMCMC1Par();
 
@@ -109,7 +119,7 @@ int mcmc(int no_d, int no_threads, int N,
 
     for(j=0; j<N; j++) {
       gsl_rng_set(thread0->gsl_rng_pt, j+N*i);
-      accept = propose_tps(r, times, prop_particles, i);
+      accept = propose_tps(r, times, prop_particles, g, i, &row_prop);
       if(accept > 0.5){
         k=0; no_sims = threads[k]->no_sims;
         while(k<no_threads && no_sims > 0){
@@ -119,7 +129,6 @@ int mcmc(int no_d, int no_threads, int N,
           k++;
           no_sims = threads[k]->no_sims;
 	}
-
 	util->prop = 0;       
         k=0; no_sims = threads[k]->no_sims;
         while(k<no_threads && no_sims > 0){
@@ -133,27 +142,42 @@ int mcmc(int no_d, int no_threads, int N,
           no_sims = threads[k]->no_sims;
 	}
       }
+    
       u = gsl_rng_uniform(r);  
-      compare_tp = log(u) + util->cur;
+      compare_tp = log(u) + util->cur + log(wts[row_cur]) -log(wts[row_prop]);
+     
       if(util->prop > compare_tp && accept > 0.5) {
-        util->cur = util->prop;
+        util->cur = util->prop; row_cur = row_prop;
         for(k=1; k<(no_d); k++) {
           times->cur[k] = times->prop[k];
         }
         no_accept++;
       }
+     
       update_particles(j, cur_particles, times->cur, util->cur);
+      wts[j] = util->cur;
+      if(wts[j] > max_wts) max_wts = wts[j];
       if(verbose)
         print_mcmc_status(j, no_d, power_up, times->cur,
                           util, no_accept);
     }
+
     save_particles(cur_particles, i);
+    gsl_ran_discrete_free(g);
+    for(j=0; j<N; j++) {
+      wts[j] = wts[j] - max_wts;
+      wts[j] = exp(wts[j]);
+      wts[j] = pow(wts[j], (power_up + 1.0)/power_up);
+    }
+    g = gsl_ran_discrete_preproc(N, (const double *) wts);
+
     swap_particles(&prop_particles, &cur_particles);
    }
 
   /* Memory management is almost non-existant :(
    * Just clean up after the programme ends 
    */
+  gsl_ran_discrete_free(g);
   gsl_matrix_free(cur_particles);
   gsl_matrix_free(prop_particles);
   free(levels);

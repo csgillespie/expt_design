@@ -18,6 +18,7 @@ double *get_levels(int max_level)
     if(i < 2) levels[i] = 0;
     else if(i < 4) levels[i] = 1;
     else levels[i] = 2;
+    levels[i] = 2;
   }
   return(levels);
 }

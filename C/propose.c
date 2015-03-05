@@ -82,13 +82,15 @@ void perturb_tps (gsl_rng *r, st_mcmc_npar *times)
  */
 
 int propose_tps (gsl_rng *r, st_mcmc_npar *times, 
-                   gsl_matrix *prop_particles, int i) 
+                 gsl_matrix *prop_particles, gsl_ran_discrete_t *g, 
+                 int level, int *row) 
 {
-  int row, accept=0;
+  int accept=0;
   accept = 0;
-  if(i > 0) {
-    row = pick_row(r, prop_particles->size1);
-    sample_row(row, times, prop_particles);
+  if(level > 0) {
+    row[0] = gsl_ran_discrete(r, g);
+    //    row = pick_row(r, prop_particles->size1);
+    sample_row(row[0], times, prop_particles);
   } else {
     perturb_tps(r, times);
     accept = check_tps(times);
