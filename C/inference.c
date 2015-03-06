@@ -102,8 +102,6 @@ int mcmc(int no_d, int no_threads, int N,
     wts_prop[i] = 1;
   }
 
-  gsl_ran_discrete_t *g = gsl_ran_discrete_preproc(N, (const double *) wts_cur);
-  
   st_mcmc_npar *times = init_times(no_d);
   st_mcmc_1par *util = initMCMC1Par();
 
@@ -150,7 +148,7 @@ int mcmc(int no_d, int no_threads, int N,
       u = gsl_rng_uniform(r);  
       compare_tp = log(u) + util->cur + log(wts_cur[row_prop])  ;
      
-      if(util->prop + log(wts_cur[row_cur])> compare_tp && accept > 0.5) {
+      if(util->prop + log(wts_cur[row_cur]) > compare_tp && accept > 0.5) {
         util->cur = util->prop; row_cur = row_prop;
         for(k=1; k<(no_d); k++) {
           times->cur[k] = times->prop[k];
@@ -174,7 +172,7 @@ int mcmc(int no_d, int no_threads, int N,
       wts_prop[j] = pow(wts_prop[j], (power_up + 1.0)/power_up);
       wts_cur[j] = wts_prop[k];
     }
-    g = gsl_ran_discrete_preproc(N, (const double *) wts_prop);
+    g = gsl_ran_discrete_preproc(N, (const double *) wts_cur);
 
     swap_particles(&prop_particles, &cur_particles);
    }
