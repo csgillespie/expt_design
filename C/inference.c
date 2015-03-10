@@ -101,7 +101,7 @@ int mcmc(int no_d, int no_threads, int N,
     wts_cur[i] = 1;
     wts_prop[i] = 1;
   }
-
+  gsl_ran_discrete_t *g = gsl_ran_discrete_preproc(N, (const double *) wts_cur);
   st_mcmc_npar *times = init_times(no_d);
   st_mcmc_1par *util = initMCMC1Par();
 
