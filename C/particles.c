@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h> /* String */
 #include <string.h> /* String */
-
 #include <gsl/gsl_matrix.h>
 
 

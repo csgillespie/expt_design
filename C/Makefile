@@ -7,10 +7,16 @@
 
 
 CC =  gcc
-CFLAGS = -Wall 
-CFLAGS =  -Wall -O3 -DHAVE_INLINE -DGSL_RANGE_CHECK_OFF  
-OBJECTS = init.o ODE.o print.o simulation.o update.o  propose.o likelihood.o
-OBJECTS += prior.o inference.o particles.o io.o
+CFLAGS = -Wall
+#CFLAGS =  -Wall -O3 -DHAVE_INLINE -DGSL_RANGE_CHECK_OFF  
+CFLAGS += -Iinclude/ 
+OBJECTS = inference.o init.o particles.o print.o  io.o
+
+APHIDS = aphids.o  aphids_init.o  aphids_likelihood.o aphids_print.o 
+APHIDS += aphids_prior.o  aphids_propose.o  aphids_simulation.o  aphids_update.o
+APHIDS_OBJECTS = $(foreach obj,$(APHIDS),aphids/$(obj))
+OBJECTS += $(APHIDS_OBJECTS)
+
 LDFLAGS =  -lgsl -lgslcblas -lm -lpthread
 FILE=main
 
@@ -22,15 +28,18 @@ SHELL=/bin/bash -l
 $(FILE): $(OBJECTS) $(FILE).c
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(FILE) $(FILE).c $(LDFLAGS) $(DEBUG)
 
+
+
 %.o : %.c
-	$(CC) $(CFLAGS) -c $< $(DEBUG)
+	$(CC) $(CFLAGS) -o $@ -c $< $(DEBUG)
+#$(CC) $(CFLAGS) -c $< $(DEBUG)
 
 load:
 	module load gsl/1.16
 	module load gcc/4.9.2
 
 run: $(FILE)
-	./$(FILE)
+	./$(FILE) -d 2 -l 3 -N 3
 
 
 # build:
@@ -46,7 +55,7 @@ copy:
 	scp parts_*.csv clyde:/tmp/
 
 clean:
-	rm -fv *.o *.tab *~ $(FILE)
+	rm -fv *.tab *~ $(FILE) $(OBJECTS)
 
 cleaner:
 	make clean

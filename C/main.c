@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <gsl/gsl_rng.h>
 
-#include "include/io.h"
-#include "include/inference.h"
-#include "include/st_mcmc_par.h"
-#include "include/print.h"
+#include "io.h"
+#include "inference.h"
+#include "st_main.h"
+#include "print.h"
 
 double *get_levels(int max_level)
 {
@@ -33,28 +33,9 @@ int main(int argc, char *argv[])
   int max_levels = get_max_level(argc, argv);
   double *levels = get_levels(max_levels);
 
+ 
   if(verbose == 1)
     print_options(no_d, no_threads, N, max_levels, levels);
   mcmc(no_d, no_threads, N, max_levels, levels, verbose);
   return(GSL_SUCCESS);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

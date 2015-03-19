@@ -3,8 +3,7 @@
 #include <string.h> /* String */
 
 #include <gsl/gsl_matrix.h>
-#include "include/st_sim_data.h"
-#include "include/st_mcmc_par.h"
+#include "st_main.h"
 
 void add_newline(int nl)
 {
@@ -25,14 +24,6 @@ void print_options(int no_d, int no_threads, int N,
 }
 
 
-void print_sim_pars(st_sim_data *sim_data, int nl) 
-{
-  int i;
-  for(i=0; i<2; i++)
-    printf("%f,\n", sim_data->pars[i]);
-  add_newline(nl);
-}
-
 
 void print_times(double *times, int no_d, int nl) 
 {
@@ -40,24 +31,6 @@ void print_times(double *times, int no_d, int nl)
   for(i=0; i<no_d; i++) 
     printf("%.0f,", times[i]);
   add_newline(nl);
-}
-
-void print_sim_n(st_sim_data *sim_data, int nl) 
-{
-  int i;
-  int no_d = sim_data->no_d;
-
-  for(i=0; i<2; i++)
-    printf("%f,\n", sim_data->pars[i]);
-  
-  for(i=0; i< 5; i++) {
-    printf("%3.1f, %3.1f\n", sim_data->n[i], sim_data->c[i]);
-  }
-
-  for(i=0; i<(no_d-1); i++) {
-    printf("%3.2f, %3.3f\n", sim_data->t[i], sim_data->t_diff[i]);
-  }
-  printf("%3.3f\n", sim_data->t[no_d-1]);
 }
 
 void print_utils(st_mcmc_1par *util, int nl)
