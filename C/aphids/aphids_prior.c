@@ -32,8 +32,6 @@ void aphids_init_pars(double *pars)
   pars[0] = lambda; pars[1] = mu;
 }
 
-
-//  gsl_ran_bivariate_gaussian (const gsl_rng * r, double sigma_x, double sigma_y, double rho, double * x, double * y)
 void aphids_sample_priors(gsl_rng * r, st_sim_data *sim_data) 
 {
   double lambda = 0.246, mu = 0.000134;
@@ -50,9 +48,6 @@ void aphids_sample_priors(gsl_rng * r, st_sim_data *sim_data)
     exit(GSL_FAILURE);
   }
 }
-
-//double gsl_ran_bivariate_gaussian_pdf (double x, double y, double sigma_x,
-//double sigma_y, double rho)
 
 double aphids_eval_priors(double *pars)
 {

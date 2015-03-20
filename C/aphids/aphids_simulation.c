@@ -63,6 +63,7 @@ void odeSim(st_sim_data *sim_data,st_gsl_ode *gsl_ode) {
 
 /* 
    Public functions
+   * Level not used
 */
 
 void aphids_sim(gsl_rng *r, st_sim_data *sim_data, 

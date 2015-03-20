@@ -18,7 +18,7 @@
 #include "aphids_simulation.h"
 #include "aphids_prior.h"
 #include "aphids_update.h"
-#include "aphids_likelihood.h"
+#include "aphids_inference.h"
 /* 
  * Private functions
  * However, most are exported as functions pointers

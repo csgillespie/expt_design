@@ -7,6 +7,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include "../include/st_main.h"
+#include "../include/propose_time.h"
 #include "aphids_propose.h"
 
 void aphids_propose_pars(gsl_rng *r, double *pars) 
@@ -18,20 +19,7 @@ void aphids_propose_pars(gsl_rng *r, double *pars)
   pars[0] += p0; pars[1] += p1;
 }
 
-
-double move (gsl_rng *r) 
-{
-  int state = 0;
-  double u = gsl_rng_uniform(r);
-  if(u < 1.0/3) {
-    state++;
-  } else if(u < 2.0/3) {
-    state--;
-  }
-  return(state);
-}
-
-int check_tps (st_mcmc_npar *times) 
+int aphids_check_tps (st_mcmc_npar *times) 
 {
   int k, no_tps, accept;
   no_tps = times->n;
@@ -46,21 +34,3 @@ int check_tps (st_mcmc_npar *times)
   return(accept);
 }
 
-
-void sample_row(int row, st_mcmc_npar *times, gsl_matrix *prop_particles)
-{
-  int k, no_tps;
-  no_tps = times->n;
-  for(k=0; k<no_tps; k++) {
-    times->prop[k] = gsl_matrix_get (prop_particles, row, k);
-  }
-}
-
-void perturb_tps (gsl_rng *r, st_mcmc_npar *times)
-{
-  int k, no_tps;
-  no_tps = times->n;
-  for(k=1; k<no_tps; k++) {
-    times->prop[k] = times->cur[k] + move(r);
-  }
-}

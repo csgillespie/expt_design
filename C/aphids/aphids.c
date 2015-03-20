@@ -14,28 +14,14 @@
 
 //#include "st_model_funcs.h"
 #include "st_aphids.h"
-#include "aphids_likelihood.h"
+#include "aphids_inference.h"
 #include "aphids_prior.h"
 #include "aphids_simulation.h"
 #include "aphids_init.h"
 #include "aphids_print.h"
 #include "aphids_propose.h"
+#include "../include/propose_time.h"
 #include "aphids.h"
-
-
-
-
-/*Public init function */
-
-/* st_model_funcs *aphids_init_funcs() 
- * {
- * 
- *   st_model_funcs *model_funcs = malloc(sizeof(st_model_funcs));
- *   model_funcs->propose = &aphids_propose_pars;
- *   model_funcs->calculate_utility = &aphids_calculate_utility;
- *   model_funcs->simulate = aphids_simulate;
- *   return(model_funcs);
- * } */
 
 void *aphids_init_data(int no_d)
 {
@@ -60,9 +46,8 @@ int aphids_propose_times (gsl_rng *r, st_mcmc_npar *times,
     sample_row(row[0], times, prop_particles);
   } else {
     perturb_tps(r, times);
-    accept = check_tps(times);
   }
-  accept = check_tps(times);
+  accept = aphids_check_tps(times);
   return(accept);
 }
 
