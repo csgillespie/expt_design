@@ -26,7 +26,13 @@ get_plot = function(l) {
     
   }
 }
-l = load_files(dir = "/tmp/6pta/")
+l = load_files(dir = "/tmp/2pt//")
+setnicepar(mfrow=c(1, 3))
+hist(l[[1]]$V3, breaks="fd")
+hist(l[[2]]$V3/2, breaks="fd")
+hist(l[[3]]$V3/3, breaks="fd")
+
+
 get_plot(l)
 get_plot(l2)
 
