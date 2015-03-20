@@ -25,8 +25,12 @@ void aphids_sample_ic(gsl_rng * r, st_sim_data *sim_data)
   sim_data->c[0] = 28;
 }
 
+void aphids_init_pars(double *pars)
+{
 
-
+  double lambda = 0.246, mu = 0.000134;
+  pars[0] = lambda; pars[1] = mu;
+}
 
 
 //  gsl_ran_bivariate_gaussian (const gsl_rng * r, double sigma_x, double sigma_y, double rho, double * x, double * y)
@@ -36,14 +40,10 @@ void aphids_sample_priors(gsl_rng * r, st_sim_data *sim_data)
   double lambda_sd = 0.00079, mu_sd = 0.000002;
   double cor = 0.356;
   double *pars = sim_data->pars;
-int level =3;
-  if(level < 1.5) {
-    pars[0] = lambda; pars[1] =mu ;
-  } else {
+
     gsl_ran_bivariate_gaussian (r, lambda_sd*10, mu_sd*10, cor, &pars[0], &pars[1]);
     pars[0] += lambda;
     pars[1] += mu;
-  }
   
   if(pars[0] < 0 || pars[1] < 0 ) {
     printf("2. BAD SAMPLE\n");

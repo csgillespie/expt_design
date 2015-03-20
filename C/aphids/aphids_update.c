@@ -4,10 +4,9 @@
 #include "aphids_update.h"
 
 
-void aphids_update_sim_pars(double * old, double *new)
+void aphids_update_sim_pars(st_sim_data *sim_data, double *pars)
 {
-  old[0] = new[0];
-  old[1] = new[1];
+  sim_data->pars[0] = pars[0]; sim_data->pars[1] = pars[1];
 }
 
 

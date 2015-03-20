@@ -97,46 +97,40 @@ double get_moment(int i, st_moments *moments) {
 
 double aphids_calculate_utility(gsl_rng *r, st_gsl_ode *gsl_ode, st_sim_data *sim_data)
 {
-  int i=0, accept=1, N=10000;
-  double log_u, utilty, compare;
+  int i, N=10000, no_of_accepts = 0;;
+  double log_u, utility, compare;
 
+  st_moments *moments = init_moments();
   st_mcmc_1par *ll = initMCMC1Par();
   st_mcmc_npar *pars = initMCMCnPar(2);
-  aphids_sample_priors(r, sim_data);
-  aphids_sample_priors(r, sim_data);
-
+  aphids_init_pars(pars->cur);  aphids_init_pars(pars->prop);
   ll->cur = GSL_NEGINF;
-  st_moments *moments = init_moments();
   
-  /* sample from Prior */
-  int no_of_accepts = 0;
-  while(i<N && accept> 0.5) {
+  for(i=0; i<N; i++) {
     aphids_propose_pars(r, pars->prop);
-    aphids_update_sim_pars(pars->cur, pars->prop);
-    //    aphids_update_sim_pars(sim_data, pars->prop);
+    aphids_update_sim_pars(sim_data, pars->prop);
     log_u = log(gsl_rng_uniform(r));
     compare = log_u + ll->cur + aphids_eval_priors(pars->cur) -  aphids_eval_priors(pars->prop);
     ll->prop = get_log_ll(gsl_ode, sim_data, compare);
 
     if(ll->prop  > compare) {
       ll->cur = ll->prop;
-      aphids_update_sim_pars(pars->cur, pars->prop);
+      pars->cur[0] = pars->prop[0]; 
+      pars->cur[1] = pars->prop[1]; 
       no_of_accepts++;
     } else {
-      aphids_update_sim_pars(pars->prop, pars->cur);
+      pars->prop[0] = pars->cur[0];
+      pars->prop[1] = pars->cur[1]; 
     }
-   
+
     if(i % 10 == 0) updateMoments(moments, pars->cur);
-    i++;    
   }
   fflush(stdout);
-  utilty = get_moment(3, moments)*get_moment(4, moments)-
+
+  utility = get_moment(3, moments)*get_moment(4, moments)-
                   get_moment(5,moments)*get_moment(5,moments);
-  /* printf("%f, %f, %f\n", pow(get_moment(3, moments),0.5),
-   *        pow(get_moment(4, moments),0.5), get_moment(5, moments));*/
-  //printf("Accept: %f\n", 1.0*no_of_accepts/i*100);
   free(pars);
   free(moments);
-  return(-log(utilty));
+  return(-log(utility));
 }
 
