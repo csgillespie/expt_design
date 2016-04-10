@@ -46,8 +46,8 @@ pre_screen = function(N=10, ds, n_d) {
   
   util_prop = sapply(1:N, function(i) get_utility(y_prop[i,],  c(0, ds[d_prop[i,]])))
   ud_mat[,ncol(ud_mat)] = util_prop
-  n = aggregate(ud_mat[,1], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4], ud_mat[,5]), sum)[,n_d+1]
-  u = aggregate(ud_mat[,5], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4], ud_mat[,5]), sum)
+  n = aggregate(ud_mat[,1], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4]), sum)[,n_d+1]
+  u = aggregate(ud_mat[,5], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4]), sum)
   
   m = matrix(0, ncol=n_d+2, nrow=length(n)*2)
   m[1:length(n),1] = n
@@ -137,8 +137,12 @@ g = function(N = c(10, 10), p=0.2, seed=NULL, n_d = 4, J=1){
   }
   l
 }
-tmp = g(N = c(20000, 20000,20000,20000,20000), n_d = 4)
 
+
+tmp = g(N = c(20, 20), n_d = 3)
+
+tmp = g(N = c(20000, 20000,20000,20000,20000), n_d = 3)
+saveRDS(tmp, file="d3.RData")
 cl = makeCluster(6)
 clusterExport(cl, c("g", "simulate", "get_utility", "K", "pre_screen", "next_J", "get_det"))
 res1 = parLapply(cl, 1:10, function(i) g(N = c(20000, 20000,20000,20000,20000), n_d = 4))
