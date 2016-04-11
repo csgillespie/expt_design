@@ -2,35 +2,6 @@ library("parallel")
 compiler::enableJIT(3)
 source("R/death_4d/death_utility.R")
 
-collapse_d = function(m, no_of_ps) {
-  n_d = ncol(m) - 4
-  
-  ## sample size of three hard coded
-  n = aggregate(m[,7], by=list(m[,3], m[,4], m[,5], m[,6]), sum)
-  u = aggregate(m[,8], by=list(m[,3], m[,4], m[,5], m[,6]), mean)
-  
-  m_collapse = matrix(0, ncol=n_d + 4, nrow=nrow(n))
-  m_collapse[,1] = n[, n_d+1] # Sample size
-  m_collapse[,2] = u[, n_d+1] # u(d)
-  m_collapse[,3:(n_d + 2)] = as.matrix(u[,1:n_d]) # d
-  
-  colnames(m_collapse) = c("n", "u", paste0("d", (1:n_d)-1), "n_pr", "u_pr")
-  
-  ## Remove designs from outside design space
-  m_collapse = m_collapse[m_collapse[,2] > 0,]
-  return(m_collapse)
-}
-
-merge_d = function(m) {
-  n_d = ncol(m) - 4
-  ## Merge on design points
-  m[,2] = (m[,2]*m[,1] + m[,8]*m[,7])/(m[,1] + m[,7])
-  m[,1] = m[,1] + m[,7]
-  m[,7:8] = m[,7:8]*0
-  colnames(m) = c("n", "u", paste0("d", (1:n_d)-1), "n_pr", "u_pr")
-  m
-}
-
 
 pre_screen = function(N=10, ds, n_d) {
   
@@ -46,8 +17,8 @@ pre_screen = function(N=10, ds, n_d) {
   
   util_prop = sapply(1:N, function(i) get_utility(y_prop[i,],  c(0, ds[d_prop[i,]])))
   ud_mat[,ncol(ud_mat)] = util_prop
-  n = aggregate(ud_mat[,1], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4], ud_mat[,5]), sum)[,n_d+1]
-  u = aggregate(ud_mat[,5], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4], ud_mat[,5]), sum)
+  n = aggregate(ud_mat[,1], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4]), sum)[,n_d+1]
+  u = aggregate(ud_mat[,n_d+2], by=list(ud_mat[,2], ud_mat[,3], ud_mat[,4]), sum)
   
   m = matrix(0, ncol=n_d+2, nrow=length(n)*2)
   m[1:length(n),1] = n
@@ -137,8 +108,8 @@ g = function(N = c(10, 10), p=0.2, seed=NULL, n_d = 4, J=1){
   }
   l
 }
-tmp = g(N = c(20000, 20000,20000,20000,20000), n_d = 4)
-
+tmp = g(N = c(20000, 20000,20000,20000,20000), n_d = 3)
+saveRDS(tmp, file="/tmp/tmp.RData")
 cl = makeCluster(6)
 clusterExport(cl, c("g", "simulate", "get_utility", "K", "pre_screen", "next_J", "get_det"))
 res1 = parLapply(cl, 1:10, function(i) g(N = c(20000, 20000,20000,20000,20000), n_d = 4))
