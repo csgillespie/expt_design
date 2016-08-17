@@ -1,5 +1,3 @@
-library("MASS")
-library("mvtnorm")
 eval_sigma2_prior = function(x){
   m = 0.01; v = 10^(-5)
   scale = v/m;shape = m^2/v
@@ -7,7 +5,7 @@ eval_sigma2_prior = function(x){
 }
 
 eval_pars_prior = function(x) {
-  mvtnorm(x, c(-3.26, 8.99), 
+ mvtnorm::dmvnorm(log(x), c(-3.26, 8.99), 
                 matrix(c(0.0071, -0.0057, -0.0057, 0.0080), ncol=2), log=TRUE)
 }
 
@@ -17,9 +15,9 @@ propose_sigma2 = function(log=FALSE) {
   rgamma(1, shape = shape, scale=scale)
 }
 
-propose_pars = function() {
+propose_pars = function(d=1) {
   pars = MASS::mvrnorm(1, mu = c(-3.26, 8.99), 
-                       Sigma = matrix(c(0.0071, -0.0057, -0.0057, 0.0080), ncol=2))
+                       Sigma = matrix(c(0.0071, -0.0057, -0.0057, 0.0080)*d, ncol=2))
   pars = exp(pars)
   names(pars) = c("ke", "V")
   pars

@@ -1,4 +1,3 @@
-
 get_y = function(t, D, T_inf, ke, V, sigma2){
   eps_t = rnorm(1, 0, sqrt(sigma2))
   y = D/T_inf*1/(ke*V)*(1 + eps_t)
@@ -22,7 +21,11 @@ get_data = function(ke, V, sigma2, x=0:300, D=500, T_inf=30){
   as.vector(y)
 }
 
-get_cmax = function(ke, V,D=500, T_inf=30) D/T_inf*1/(ke*V)*(1-exp(-ke*T_inf))
+get_cmax = function(ke, V,D=500, T_inf=30) {
+ cmax = (D/T_inf)*1/(ke*V)*(1-exp(-ke*T_inf))
+ ## Now scale
+ cmax*1000
+}
 
 # 
 # 
