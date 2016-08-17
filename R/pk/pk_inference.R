@@ -64,7 +64,7 @@ optimal = function(n = 167, max_j = 5) {
     ratios = base/sapply(JS, function(i) get_utility_det(i,m= m))
     J = JS[min(which(ratios < 0.5^2), 11)]
     message("#### ", J)
-    saveRDS(m, file=paste0("/tmp/tmp", j, ".RData"))
+    #saveRDS(m, file=paste0("/tmp/tmp", j, ".RData"))
   }
   attr(m, "J") = J
   return(m)
@@ -75,6 +75,7 @@ optimal = function(n = 167, max_j = 5) {
 for(i in 1:1000) {
   set.seed(i)
   m = optimal(n=167, 5)
+  dir.create("output/pk", showWarnings = FALSE)
   fname = file.path("output","pk", paste0("m_",i, ".RData" ))
   saveRDS(m, file=fname)
 }
