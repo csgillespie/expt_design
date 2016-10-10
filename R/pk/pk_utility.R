@@ -1,14 +1,17 @@
 get_ll = function(x, y, ke, V, sigma2, D=500, T_inf=30) {
   sim = get_data(x=x,D=D, T_inf=T_inf, ke=ke, V=V, sigma2=0)
-  sum(sapply(2:length(y), function(i) dnorm(y[i], sim[i], sim[i]*sqrt(sigma2), log=TRUE)))
+  ll = sapply(2:length(y), function(i) dnorm(y[i], sim[i], sim[i]*sqrt(sigma2), log=TRUE))
+  ll = ll[!is.infinite(ll)] # Removes points that are close together. A bit of a hack
+  sum(ll)
 }
 
 check_timepoints = function(x) {
-  if(sum(x < 120) < 7) return(FALSE)
-  if(any(abs(diff(x)) < 1)) return(FALSE)
+  if(sum(x < 120) < 5) return(FALSE)
+  #if(any(abs(diff(x)) < 1)) return(FALSE)
   return(TRUE)
 }
 
+#sigma2_cur = sigma2; pars_cur = pars; ll_cur = -Inf
 get_utility = function(x, y, sigma2_cur, pars_cur, ll_cur, N=10000) {
   dd = data.frame(sigma2 = numeric(N), ke = numeric(N), V =numeric(N), ll = 0, cmax=0)
   for(i in 1:N) {
@@ -33,11 +36,12 @@ get_utility = function(x, y, sigma2_cur, pars_cur, ll_cur, N=10000) {
 
 estimate_utility = function(x, y, sigma2, pars, N) {
   dd = NULL;ll = -Inf; ess = 0
-  while(ess < 50) {
+  while(ess < 150) {
     dd_tmp = get_utility(x, y, sigma2, pars, ll, N)
     dd = rbind(dd, dd_tmp)
     (ess = coda::effectiveSize(dd[,ncol(dd)]))
     sigma2 = dd[nrow(dd), 1]; pars = unlist(dd[nrow(dd), 2:3]); 
+    message(ess)
   }
   (1/var(dd[,ncol(dd)]))
 }
@@ -55,9 +59,9 @@ get_parameters = function(m, s=NULL) {
 get_us = function(s, m) {
   pars = get_parameters(m, s)
   q = seq(0, 1, length.out=12)[-12]
-  (x = round(qbeta(q, pars[1], pars[2])*720))
-  if(!check_timepoints(x)) return(0)
-  
+  (x = qbeta(q, pars[1], pars[2])*720)
+ # if(!check_timepoints(x)) return(0.06891) # Prior predictive value
+  (x = qbeta(q, 0.73, 3.1)*720)
   pars = propose_pars()
   sigma2 = propose_sigma2()
   ke = pars[1]; V = pars[2]

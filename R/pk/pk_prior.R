@@ -1,3 +1,5 @@
+if(!("mvtnorm" %in% installed.packages())) install.packages("mvtnorm")
+
 eval_sigma2_prior = function(x){
   m = 0.01; v = 10^(-5)
   scale = v/m;shape = m^2/v
