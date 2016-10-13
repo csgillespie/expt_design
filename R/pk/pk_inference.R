@@ -1,5 +1,5 @@
 library(doParallel)
-no_of_cores = 6
+no_of_cores = parallel::detectCores()
 #cl = makeCluster(6)
 registerDoParallel(no_of_cores)
 
@@ -85,16 +85,12 @@ optimal = function(n = 50000, j = 2^(0:6)) {
   return(m)
 }
 
-for(i in 2:1000) {
-  set.seed(i)
-  m = optimal()
-  dir.create("output/pk", showWarnings = FALSE)
-  fname = file.path("output","pk", paste0("m_",i, ".RData" ))
-  saveRDS(m, file=fname)
-}
+m = optimal(n = 2)
+# 
+# for(i in 2:1000) {
+#   set.seed(i)
+#   m = optimal()
+dir.create("output/pk", showWarnings = FALSE)
+fname = file.path("output","pk", paste0("m_",i, ".RData" ))
+saveRDS(m, file=fname)
 
-
-m = as.data.frame(m)
-
-library(ggplot2)
-ggplot(m) + geom_raster(aes(V1, V2, fill=V4)) 
