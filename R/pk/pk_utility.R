@@ -41,7 +41,7 @@ estimate_utility = function(x, y, sigma2, pars, N) {
     dd = rbind(dd, dd_tmp)
     (ess = coda::effectiveSize(dd[,ncol(dd)]))
     sigma2 = dd[nrow(dd), 1]; pars = unlist(dd[nrow(dd), 2:3]); 
-    message(ess)
+    #message(ess)
   }
   (1/var(dd[,ncol(dd)]))
 }
