@@ -96,10 +96,10 @@ get_instance_id = function(verbose=FALSE) {
          intern=TRUE,  ignore.stderr=!verbose) 
 }
 
-run = function(n) {
+run = function(n=50000) {
   instance_id = get_instance_id()
   on.exit(aws.ec2::terminate_instances(instance_id))
   optimal(n = n)
 }
 
-run(1)
+run()
