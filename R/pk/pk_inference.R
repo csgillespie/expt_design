@@ -42,7 +42,7 @@ update_m = function(m, s, res) {
 # m: columns 1 & 2: shape1, shape2 of beta
 # 3, 4: n, E(u(d))
 # 5, 6: E(u(d)^2), has_visited
-optimal = function(n = 50000, j = 2^(0:6)) {
+optimal = function(n = 5000, j = 2^(0:6)) {
 
   m_g = expand.grid(0:MAX_X, 0:MAX_Y)
   m = matrix(0, ncol=6, nrow=nrow(m_g))
@@ -52,7 +52,7 @@ optimal = function(n = 50000, j = 2^(0:6)) {
   threads = 10*no_of_cores                                   ####XXXXX
   J = 1; lambda=4
   (nr = nrow(m))
-  n = ceiling((n/length(j))/threads)
+  #n = ceiling((n/length(j))/threads)
   
   m_global = m
   for(J in j) {
@@ -74,13 +74,16 @@ optimal = function(n = 50000, j = 2^(0:6)) {
       res = foreach(k = s, .combine = c) %dopar%  get_us(k, m)
       if(any(res > 3)) stop("Big res")
       m = update_m(m, s, res)
-      m_global = update_m(m_global, s, res)
+      upload_item(m)
+      m_global = combine_items()
+      
+      #      m_global = update_m(m_global, s, res)
 
       message(i)
     }
     
-    upload_item(m)
-    m_global = combine_items()
+    #upload_item(m)
+    #m_global = combine_items()
     
     message("#### ", J)
 
@@ -96,10 +99,11 @@ get_instance_id = function(verbose=FALSE) {
          intern=TRUE,  ignore.stderr=!verbose) 
 }
 
-run = function(n=50000) {
+run = function(n=5000) {
   instance_id = get_instance_id()
   on.exit(aws.ec2::terminate_instances(instance_id))
   optimal(n = n)
 }
 
-run()
+#10000/(10*32/5)/7
+run(23)
