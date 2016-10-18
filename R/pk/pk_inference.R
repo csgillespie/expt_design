@@ -90,9 +90,16 @@ optimal = function(n = 50000, j = 2^(0:6)) {
   return(m)
 }
 
-m = optimal(n = 1)
-# 
-# for(i in 2:1000) {
-#   set.seed(i)
-#   m = optimal()
+#http://stackoverflow.com/q/625644/203420
+get_instance_id = function(verbose=FALSE) {
+  system("curl http://instance-data/latest/meta-data/instance-id", 
+         intern=TRUE,  ignore.stderr=!verbose) 
+}
 
+run = function(n) {
+  instance_id = get_instance_id()
+  on.exit(aws.ec2::terminate_instances(instance_id))
+  optimal(n = n)
+}
+
+run(1)
