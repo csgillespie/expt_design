@@ -61,7 +61,6 @@ get_us = function(s, m) {
   q = seq(0, 1, length.out=12)[-12]
   (x = qbeta(q, pars[1], pars[2])*720)
  # if(!check_timepoints(x)) return(0.06891) # Prior predictive value
-  (x = qbeta(q, 0.73, 3.1)*720)
   pars = propose_pars()
   sigma2 = propose_sigma2()
   ke = pars[1]; V = pars[2]
