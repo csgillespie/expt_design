@@ -108,7 +108,7 @@ get_instance_id = function(verbose=FALSE) {
 is_instance = function() {
   hostname = system("hostname -d", intern=TRUE)
   #"eu-west-1.compute.internal"
-  length(grep( "*.compute.internal$", hostname)) > 1
+  length(grep( "*.compute.internal$", hostname)) == 1
 }
 
 run = function(n=5000) {
