@@ -47,7 +47,9 @@ optimal = function(n = 5000, j = 2^(0:5)) {
   m[,1] = m_g[,1];m[,2] = m_g[,2];
   m = m[m[,1] > 0.00 & m[,2] > 0.0, ]
   m[,4] = 1 # Store E[X]. Not zero so it samples in i=1
-  threads = 10*no_of_cores                                   ####XXXXX
+  threads = 10*no_of_cores       
+  message(threads)
+  
   J = 1; lambda=4
   (nr = nrow(m))
   #n = ceiling((n/length(j))/threads)
@@ -111,12 +113,12 @@ is_instance = function() {
   length(grep( "*.compute.internal$", hostname)) == 1
 }
 
-run = function(n=5000) {
+run = function(n=5000, j=0:5) {
   if(is_instance()) {
     instance_id = get_instance_id()
     on.exit(aws.ec2::terminate_instances(instance_id))
   }
-  optimal(n = n)
+  optimal(n = n, j=j)
 }
 #no_of_cores = 6 ###############################################
 registerDoParallel(no_of_cores)
@@ -124,4 +126,12 @@ registerDoParallel(no_of_cores)
 #50000/(10*32)/6
 #50000/(10*6)/6
 #m = run(139)
-m = run(floor(139/4))
+m = run(125/6)
+
+# system.time(run(5, j=0))
+# 
+# 5970/(80*5)
+# 
+# (5.25*60)/2.5
+# 
+# 10*15/60
