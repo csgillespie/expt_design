@@ -126,7 +126,8 @@ registerDoParallel(no_of_cores)
 #50000/(10*32)/6
 #50000/(10*6)/6
 #m = run(139)
-m = run(18)
+no_of_hours = 5.5
+m = run(9*no_of_hours)
 
 #system.time(run(50, j=0:5))
 
