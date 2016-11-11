@@ -1,3 +1,4 @@
+.libPaths("/home/ubuntu/Rpackages")
 library(doParallel)
 (no_of_cores = parallel::detectCores())
 #cl = makeCluster(6)
