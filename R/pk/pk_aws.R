@@ -16,8 +16,6 @@ combine_items = function(bucket = "bayesianexpdesign") {
     dd[is.nan(dd[,4]),4] = 0
     dd[,6] = pmax(dd[,6], dd_tmp[,6])
   }
-  ## Set missing values to mean
-  dd[dd[,6]==0,4] = sum((dd[,3] > 0.5)*dd[,4])/sum(dd[,3])
   dd[,1:2] = l[[1]][,1:2]
   return(dd)  
 }
