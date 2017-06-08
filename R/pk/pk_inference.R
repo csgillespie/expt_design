@@ -55,12 +55,17 @@ optimal = function(n = 24000, j = 0:7) {
   (nr = nrow(m))
   n = ceiling((n/length(j))/threads)
   message("n = ", n)
-  m_global = m
+  if(is_instance()) {
+    upload_item(m)
+    m_global = combine_items()
+  } else {
+    m_global = m
+  }
   prob = rep(1, nr)
   for(J in j) {
     for(i in seq_len(n)) {
-      if(J > 0) {
-        utils = m[,4]
+      if(sum(m[,3]) > 0) {
+        utils = m_global[,4]
         q = quantile(utils, prob = 1-1/2^J)
         prob = utils >= q
         prob = prob * utils
@@ -128,7 +133,7 @@ registerDoParallel(no_of_cores)
 no_of_hours = 5.5
 #m = run(9*no_of_hours)
 
-system.time(out <-run(1200, j=4:8))
+system.time(out <-run(n=1200, j=4:8))
 
 #user   system  elapsed 
 #418653.8    909.3  85921.3 
