@@ -1,4 +1,4 @@
-.libPaths("/home/ubuntu/Rpackages")
+.libPaths(c(.libPaths(), "/home/ubuntu/Rpackages"))
 library(doParallel)
 (no_of_cores = parallel::detectCores())
 #cl = makeCluster(6)
@@ -41,32 +41,33 @@ update_m = function(m, s, res) {
 # m: columns 1 & 2: shape1, shape2 of beta
 # 3, 4: n, E(u(d))
 # 5, 6: E(u(d)^2), has_visited
-optimal = function(n = 5000, j = 2^(0:5)) {
+optimal = function(n = 24000, j = 0:7) {
   
   m_g = expand.grid(0:MAX_X, 0:MAX_Y)
   m = matrix(0, ncol=6, nrow=nrow(m_g))
   m[,1] = m_g[,1];m[,2] = m_g[,2];
   m = m[m[,1] > 0.00 & m[,2] > 0.0, ]
-  m[,4] = 1 # Store E[X]. Not zero so it samples in i=1
+  #m[,4] = 1 # Store E[X]. Not zero so it samples in i=1.
   threads = 10*no_of_cores       
   message(threads)
   
-  J = 1; lambda=4
+  J = 0; lambda=4
   (nr = nrow(m))
-  #n = ceiling((n/length(j))/threads)
-  
+  n = ceiling((n/length(j))/threads)
+  message("n = ", n)
   m_global = m
+  prob = rep(1, nr)
   for(J in j) {
-    #last_j_change = 0
     for(i in seq_len(n)) {
-      # if(sum(m_global[,4]) < 0.0000000001) {
-      #  prob = m_global[,4]^0
-      #} else {
-      ss  = sum(m_global[,4])
-      if(ss < .Machine$double.eps) ss = 1
-      prob = (m_global[,4]/sum(m_global[,4]))^J
-      #}
-      s = sample(1:nr, threads, prob = prob, replace=TRUE)
+      if(J > 0) {
+        utils = m[,4]
+        q = quantile(utils, prob = 1-1/2^J)
+        prob = utils >= q
+        prob = prob * utils
+      } 
+      
+      s = sample(1:nr, threads, prob = prob , replace=TRUE)
+      
       ## Move in x & y direction      
       s_x =  rpois(threads, lambda) - rpois(threads, lambda)
       s_y =  rpois(threads, lambda) - rpois(threads, lambda)
@@ -84,7 +85,7 @@ optimal = function(n = 5000, j = 2^(0:5)) {
       } else {
         m_global = m
       }
-      message(i)
+      message(J, ":", i)
     }
     
     if(is_instance()) {
@@ -93,9 +94,6 @@ optimal = function(n = 5000, j = 2^(0:5)) {
     } else {
       m_global = m
     }
-    
-    message("#### ", J)
-    
   }
   upload_item(m)
   attr(m, "J") = J
@@ -114,38 +112,32 @@ is_instance = function() {
   length(grep( "*.compute.internal$", hostname)) == 1
 }
 
-run = function(n=5000, j=0:5) {
+run = function(n=3000, j=0:7) {
   if(is_instance()) {
     instance_id = get_instance_id()
     on.exit(aws.ec2::terminate_instances(instance_id))
   }
   optimal(n = n, j=j)
 }
-#no_of_cores = 1 ###############################################
+no_of_cores = 6 ###############################################
 registerDoParallel(no_of_cores)
 
 #50000/(10*32)/6
 #50000/(10*6)/6
 #m = run(139)
 no_of_hours = 5.5
-m = run(9*no_of_hours)
+#m = run(9*no_of_hours)
 
-#system.time(run(50, j=0:5))
+system.time(out <-run(24000, j=0:7))
 
-# 2112/(5*6)
+#user   system  elapsed 
+#418653.8    909.3  85921.3 
+saveRDS(out, file="output/pk/pk_june8.rds")
+
+
+418653.8/24000
+2112/(5*6)
 # 19786/(50*6)
 
 # 50*60*6
 # 
-# 
-# ((2*60*60)/6)/66
-
-
-#run()
-
-# 
-# 5970/(80*5)
-# 
-# (5.25*60)/2.5
-# 
-# 10*15/60
