@@ -119,7 +119,7 @@ run = function(n=3000, j=0:7) {
   }
   optimal(n = n, j=j)
 }
-no_of_cores = 6 ###############################################
+no_of_cores = parallel::detectCores() ###############################################
 registerDoParallel(no_of_cores)
 
 #50000/(10*32)/6
@@ -128,15 +128,15 @@ registerDoParallel(no_of_cores)
 no_of_hours = 5.5
 #m = run(9*no_of_hours)
 
-system.time(out <-run(24000, j=0:7))
+system.time(out <-run(1200, j=4:8))
 
 #user   system  elapsed 
 #418653.8    909.3  85921.3 
-saveRDS(out, file="output/pk/pk_june8.rds")
+#saveRDS(out, file="output/pk/pk_june8.rds")
 
 
-418653.8/24000
-2112/(5*6)
+#418653.8/24000
+#2112/(5*6)
 # 19786/(50*6)
 
 # 50*60*6
