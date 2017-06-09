@@ -53,7 +53,7 @@ optimal = function(n = 24000, j = 0:7) {
   
   J = 0; lambda=4
   (nr = nrow(m))
-  n = ceiling((n/length(j))/threads)
+  (n = ceiling((n/length(j))/threads))
   message("n = ", n)
   if(is_instance()) {
     upload_item(m)
@@ -64,9 +64,9 @@ optimal = function(n = 24000, j = 0:7) {
   prob = rep(1, nr)
   for(J in j) {
     for(i in seq_len(n)) {
-      if(sum(m[,3]) > 0) {
+      if(sum(m_global[,3]) > n) { 
         utils = m_global[,4]
-        q = quantile(utils, prob = 1-1/2^J)
+        q = quantile(utils[m_global[,3] > 0], prob = 1-1/2^J)
         prob = utils >= q
         prob = prob * utils
       } 
@@ -124,16 +124,19 @@ run = function(n=3000, j=0:7) {
   }
   optimal(n = n, j=j)
 }
-no_of_cores = parallel::detectCores() ###############################################
-registerDoParallel(no_of_cores)
 
-#50000/(10*32)/6
-#50000/(10*6)/6
-#m = run(139)
-no_of_hours = 5.5
-#m = run(9*no_of_hours)
 
-system.time(out <-run(n=1200, j=4:8))
+if(!is_instance()) {
+  no_of_cores = 6
+  registerDoParallel(no_of_cores)  
+  system.time(out <-run(n=24000, j=0:7))
+}
+
+if(is_instance()){
+  no_of_cores = parallel::detectCores() ###############################################
+  registerDoParallel(no_of_cores)
+  system.time(out <-run(n=1200, j=4:7))
+}
 
 #user   system  elapsed 
 #418653.8    909.3  85921.3 
