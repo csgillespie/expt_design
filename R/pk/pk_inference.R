@@ -120,7 +120,7 @@ is_instance = function() {
 run = function(n=3000, j=0:7) {
   if(is_instance()) {
     instance_id = get_instance_id()
-    on.exit(aws.ec2::terminate_instances(instance_id))
+    #on.exit(aws.ec2::terminate_instances(instance_id))
   }
   optimal(n = n, j=j)
 }
@@ -135,7 +135,7 @@ if(!is_instance()) {
 if(is_instance()){
   no_of_cores = parallel::detectCores() 
   registerDoParallel(no_of_cores)
-  system.time(out <-run(n=1500*no_of_cores, j=4:7))
+  system.time(out <-run(n=750*no_of_cores, j=4:7))
 }
 
 time_per_iter = 57981/(24000/no_of_cores)
