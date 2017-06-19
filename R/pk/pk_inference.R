@@ -138,19 +138,17 @@ if(!is_instance()) {
 if(is_instance()){
   no_of_cores = parallel::detectCores() 
   registerDoParallel(no_of_cores)
-  system.time(out <-run(n=750*no_of_cores, j=4:7))
+  system.time(out <-run(n=830*no_of_cores, j=4:7))
 }
 
 time_per_iter = 57981/(24000/no_of_cores)
 60*60*6/time_per_iter
 
 #user   system  elapsed 
-#418653.8    909.3  85921.3 
-#saveRDS(out, file="output/pk/pk_june8.rds")
+#283.1    210.8 104384.8 
 
-
-#418653.8/24000
-#2112/(5*6)
+#104384.8/(24000/6)
+(6*60*60)/26
 # 19786/(50*6)
 
 # 50*60*6
