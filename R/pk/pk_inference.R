@@ -34,7 +34,7 @@ update_m = function(m, s, res) {
   m[s,5] = (m[s,5] * m[s,3] + u2*n_u)/(m[s,3] + n_u)
   m[s,3] = m[s, 3] + n_u
   m[s,6] = 1
-  m[m[,6]==0,4] = sum((m[,3] > 0.5)*m[,4])/sum(m[,3])
+ # m[m[,6]==0,4] = sum((m[,3] > 0.5)*m[,4])/sum(m[,3])
   return(m)
 }
 
@@ -48,7 +48,7 @@ optimal = function(n = 24000, j = 0:7) {
   m[,1] = m_g[,1];m[,2] = m_g[,2];
   m = m[m[,1] > 0.00 & m[,2] > 0.0, ]
   #m[,4] = 1 # Store E[X]. Not zero so it samples in i=1.
-  threads = 10*no_of_cores       
+  threads = no_of_cores       
   message(threads)
   
   J = 0; lambda=4
@@ -74,16 +74,16 @@ optimal = function(n = 24000, j = 0:7) {
       s = sample(1:nr, threads, prob = prob , replace=TRUE)
       
       ## Move in x & y direction      
-      s_x =  rpois(threads, lambda) - rpois(threads, lambda)
-      s_y =  rpois(threads, lambda) - rpois(threads, lambda)
+      s_x = rpois(threads, lambda) - rpois(threads, lambda)
+      s_y = rpois(threads, lambda) - rpois(threads, lambda)
       s_trans = s + s_x  + MAX_Y*s_y
       s_trans[s_trans < 1 | s_trans > MAX_X*MAX_Y] = s[s_trans < 1 | s_trans > MAX_X*MAX_Y]
       
       s = sort(s_trans)
       res = foreach(k = s, .combine = c) %dopar%  get_us(k, m)
-      if(any(res > 3)) stop("Big res")
-      
+      if(any(res > 3)) message("Big res")
       m = update_m(m, s, res)
+      
       if(is_instance()) {
         upload_item(m)
         m_global = combine_items()
@@ -128,7 +128,10 @@ run = function(n=3000, j=0:7) {
 
 if(!is_instance()) {
   no_of_cores = 6
-  registerDoParallel(no_of_cores)  
+  cl =makeCluster(no_of_cores, outfile="")
+  
+  clusterExport(cl, ls(envir = .GlobalEnv))
+  registerDoParallel(cl)  
   system.time(out <-run(n=24000, j=0:7))
 }
 

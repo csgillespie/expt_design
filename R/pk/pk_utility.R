@@ -35,13 +35,15 @@ get_utility = function(x, y, sigma2_cur, pars_cur, ll_cur, N=10000) {
 }
 
 estimate_utility = function(x, y, sigma2, pars, N) {
-  dd = NULL;ll = -Inf; ess = 0
-  while(ess < 1000) {
+  dd = NULL;ll = -Inf; ess = 0; 
+  n = 0
+  while(ess < 1000 & n < 500000) {
     dd_tmp = get_utility(x, y, sigma2, pars, ll, N)
     dd = rbind(dd, dd_tmp)
     (ess = coda::effectiveSize(dd[,ncol(dd)]))
     sigma2 = dd[nrow(dd), 1]; pars = unlist(dd[nrow(dd), 2:3]); 
-    #message(ess)
+    n = n + N
+    message(n)
   }
   (1/var(dd[,ncol(dd)]))
 }
