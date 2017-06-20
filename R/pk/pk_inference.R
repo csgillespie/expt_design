@@ -138,7 +138,7 @@ if(!is_instance()) {
 if(is_instance()){
   no_of_cores = parallel::detectCores() 
   registerDoParallel(no_of_cores)
-  system.time(out <-run(n=830*no_of_cores, j=4:7))
+  system.time(out <-run(n=830*no_of_cores, j=6:8))
 }
 
 time_per_iter = 57981/(24000/no_of_cores)
