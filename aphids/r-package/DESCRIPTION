@@ -1,0 +1,16 @@
+Package: aphids
+Type: Package
+Title: Aphids Example from Gillespie & Boys
+Version: 0.1
+Authors@R: person(given="Colin", family="Gillespie",
+    email="csgillespie@gmail.com", role = c("aut", "cre"))
+Maintainer: Colin Gillespie <csgillespie@gmail.com>
+Description: The aphids example from the Gillespie & Boys, Experimental
+  Design paper. This package requires the GSL C library.
+License: GPL (>= 2)
+Depends: R (>= 3.4.0)
+Imports:
+    Rcpp (>= 0.12.8), hash, doParallel, beepr, foreach
+LinkingTo: Rcpp
+RoxygenNote: 6.0.1
+ByteCompile: true
