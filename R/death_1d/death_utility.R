@@ -50,31 +50,54 @@ get_total_utility = function(ds){
 
 
 get_utility = local({
-  subd = 100000000L
-  abs_tol = 1e-14
-  ds = seq(0.01, 10, 0.01)
+  # subd = 100000000L
+  # abs_tol = 1e-14
+  # ds = seq(0.01, 10, 0.01)
   ## Species: X, Time Y,
-  m = matrix(-1, ncol=1000, nrow=51)  
+  m = readRDS("output/death_1d/utility_matrix.rds")#matrix(-1, ncol=1000, nrow=51)  
   function(i, j) {
+    return(m[i+1, j])
     ## i: species, j: Time
-    if(m[i+1, j] != -1) return(m[i+1, j])
-    
-    d = ds[j]  
-    lower = 0.5; upper = 1.5
-    K0 = integrate(K, lower=lower, upper=upper, i=0, y=i, ds=d, 
-                   subdivisions = subd, abs.tol=abs_tol)$value
-    K1 = integrate(K, lower=lower, upper=upper, i=1, y=i, ds=d, 
-                   subdivisions = subd, abs.tol=abs_tol)$value
-    K2 = integrate(K, lower=lower, upper=upper, i=2, y=i,  ds=d, 
-                   subdivisions = subd, abs.tol=abs_tol)$value
-    (m[i+1, j] = K0^2/(K2*K0-K1^2))
-    m[i+1, j]
+    # if(m[i+1, j] != -1) return(m[i+1, j])
+    # 
+    # d = ds[j]  
+    # lower = 0.5; upper = 1.5
+    # K0 = integrate(K, lower=lower, upper=upper, i=0, y=i, ds=d, 
+    #                subdivisions = subd, abs.tol=abs_tol)$value
+    # K1 = integrate(K, lower=lower, upper=upper, i=1, y=i, ds=d, 
+    #                subdivisions = subd, abs.tol=abs_tol)$value
+    # K2 = integrate(K, lower=lower, upper=upper, i=2, y=i,  ds=d, 
+    #                subdivisions = subd, abs.tol=abs_tol)$value
+    # (m[i+1, j] = K0^2/(K2*K0-K1^2))
+    # m[i+1, j]
   }
 })
 
-# i = 1; j = 560
-# get_utility(i, j)
-# get_utility(d_prop[1], 94)
-
+# subd = 100000000L
+# abs_tol = 1e-14
+# ds = seq(0.01, 10, 0.01)
+# ## Species: X, Time Y,
+# m = matrix(-1, ncol=1000, nrow=51)  
+# 
+# j = 1000; i = 50
+# for(i in 0:50){
+#   for(j in 1:1000) {
+#     
+#     
+#     d = ds[j]  
+#     lower = 0.5; upper = 1.5
+#     K0 = integrate(K, lower=lower, upper=upper, i=0, y=i, ds=d, 
+#                    subdivisions = subd, abs.tol=abs_tol)$value
+#     K1 = integrate(K, lower=lower, upper=upper, i=1, y=i, ds=d, 
+#                    subdivisions = subd, abs.tol=abs_tol)$value
+#     K2 = integrate(K, lower=lower, upper=upper, i=2, y=i,  ds=d, 
+#                    subdivisions = subd, abs.tol=abs_tol)$value
+#     (m[i+1, j] = K0^2/(K2*K0-K1^2))
+#   }
+#   message(i)
+# }
+# 
+# 
+# saveRDS(m, "output/death_1d/utility_matrix.rds")
 
 

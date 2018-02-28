@@ -36,9 +36,14 @@ st_parallel *init_parallel(int no_threads, int no_d)
     //    thread_pts[i]->level = 0;
     /* Utility */
     thread_pts[i]->utility = GSL_NEGINF;
-
     thread_pts[i]->data = aphids_init_data(no_d);
-
+    //  thread_pts[i]->times = aphids_init_times(no_d);
+    
+    //    thread_pts[i]->init_times = aphids_init_times;
+    thread_pts[i]->propose_times = aphids_propose_times;
+    //  thread_pts[i]->update_sim_times =  aphids_update_sim_times;
+    //thread_pts[i]->max_utility = 50;
+    
     //    thread_pts[i]->update_sim_times = aphids_init_update_sim_times;
     /* /\*Init sim data struct *\/
      * thread_pts[i]->sim_data = initSimData(no_d);
@@ -51,9 +56,6 @@ st_parallel *init_parallel(int no_threads, int no_d)
   }
   
   parallel->no_threads = no_threads;
-  parallel->init_times = aphids_init_times;
-  parallel->propose_times = aphids_propose_times;
-  parallel->update_sim_times =  aphids_update_sim_times;
   parallel->get_utility =  aphids_get_utility;
   parallel->thread_pts = thread_pts;
   return(parallel);
@@ -83,11 +85,9 @@ void free_mcmc_n_par(st_mcmc_npar * mcmc_par){
 }
 
 st_mcmc_1par *initMCMC1Par() {
-
   st_mcmc_1par *mcmc_par;
   mcmc_par = (st_mcmc_1par *) malloc(sizeof(st_mcmc_1par));
   mcmc_par->prop = 0;
   mcmc_par->cur = 0;
-
   return(mcmc_par);
 }

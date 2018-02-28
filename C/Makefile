@@ -10,7 +10,7 @@ CC =  gcc
 CFLAGS = -Wall
 #CFLAGS =  -Wall -O3 -DHAVE_INLINE -DGSL_RANGE_CHECK_OFF  
 CFLAGS += -Iinclude/ 
-OBJECTS = inference.o init.o particles.o print.o io.o propose_time.o
+OBJECTS = inference.o init.o particles.o print.o io.o propose_time.o hash.o
 
 APHIDS = aphids.o  aphids_init.o  aphids_inference.o aphids_print.o 
 APHIDS += aphids_prior.o  aphids_propose.o  aphids_simulation.o  aphids_update.o
@@ -39,7 +39,7 @@ load:
 	module load gcc/4.9.2
 
 run: $(FILE)
-	./$(FILE) -d 2 -l 3 -N 3
+	./$(FILE) -d 5 -l 3 -N 3
 
 
 # build:

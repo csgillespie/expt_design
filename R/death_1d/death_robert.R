@@ -24,8 +24,6 @@ robert = function(J=1, N = 10, seed=NULL){
         row = sample(1:nrow(l[[i-1]]), 1)
         d_prop = l[[i-1]][row, 2]
       }
-      
-      
       theta_prop = rlnorm(J[i], -0.005, sqrt(0.01))
       y_prop = simulate(theta_prop, J[i], ds[d_prop])
       util_prop = prod(sapply(y_prop, get_utility,  d_prop))

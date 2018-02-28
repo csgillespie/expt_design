@@ -18,6 +18,7 @@ void sample_row(int row, st_mcmc_npar *times, gsl_matrix *prop_particles)
   no_tps = times->n;
   for(k=0; k<no_tps; k++) {
     times->prop[k] = gsl_matrix_get (prop_particles, row, k);
+    printf("Time: %f\n", times->prop[k]);
   }
 }
 

@@ -46,11 +46,10 @@ get_muller_optims = function(i, N=24000) {
   c(get_optimal(muller1), get_optimal(muller8), get_optimal(muller16))
 }
 
-mullers = parallel::mclapply(1:225, get_muller_optims, mc.cores = 4)
+mullers = parallel::mclapply(1:500, get_muller_optims, mc.cores = 8)
+saveRDS(mullers, file="output/death_1d/mullers.rds")
 
 
 
-
-system.time(m8 <- muller(J=8, 24000/8))
 
 

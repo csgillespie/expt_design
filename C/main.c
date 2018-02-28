@@ -32,10 +32,10 @@ int main(int argc, char *argv[])
   int N = get_N(argc, argv);
   int max_levels = get_max_level(argc, argv);
   double *levels = get_levels(max_levels);
-
  
   if(verbose == 1)
     print_options(no_d, no_threads, N, max_levels, levels);
   mcmc(no_d, no_threads, N, max_levels, levels, verbose);
+
   return(GSL_SUCCESS);
 }

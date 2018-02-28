@@ -126,9 +126,9 @@ double aphids_calculate_utility(gsl_rng *r, st_gsl_ode *gsl_ode, st_sim_data *si
     if(i % 10 == 0) updateMoments(moments, pars->cur);
   }
   fflush(stdout);
-
   utility = get_moment(3, moments)*get_moment(4, moments)-
                   get_moment(5,moments)*get_moment(5,moments);
+
   free(pars);
   free(moments);
   return(-log(utility));
