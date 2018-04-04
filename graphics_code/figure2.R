@@ -16,22 +16,24 @@ robert4 = unlist(readRDS("data/robert4.rds"))
 robert5 = unlist(readRDS("data/robert5.rds"))
 cx = readRDS("data/cx.rds")
 
+insh =readRDS(file= "data/death_insh.rds")
+
 length(muller1)
 
 dd = data.frame(values = c(gil_constant, gil_incr, gil_de, 
                            muller1, muller8, muller16, 
                            robert3, robert4, robert5, 
-                           cx), 
+                           cx, insh), 
                 group = rep(c("SEB Con", "SEB Inc", "SEB DE", 
                               "Muller 1", "Muller 8", "Muller 16", 
                               "Robert 1", "Robert 2", "Robert 3", 
-                              "CX"), each=500), 
-                alg = factor(c(rep(1:3, each=1500), rep(4, 500))))
+                              "CX", "INSH"), each=500), 
+                alg = factor(c(rep(1:3, each=1500), rep(4, 500), rep(5, 500))))
 
 dd$group = factor(dd$group, levels=rev(c("SEB Con", "SEB Inc", "SEB DE", 
                           "Muller 1", "Muller 8", "Muller 16", 
                           "Robert 1", "Robert 2", "Robert 3", 
-                          "CX")))
+                          "CX", "INSH")))
 dd_text = data.frame(values = rep(3.5, 9), 
                      group = c("SEB Con", "SEB Inc", "SEB DE", 
                                "Muller 1", "Muller 8", "Muller 16", 
@@ -49,13 +51,13 @@ png(fname, width=10*0.8*res, height=7*0.8*res, res = res)
 g = ggplot(dd) + 
   geom_boxplot(aes(y=values, x=group, fill=alg)) + 
   theme_bw() + coord_flip() + xlab(NULL) + ylab("Design: d") + 
-  scale_fill_manual(values=c("1"="steelblue", "2"="forestgreen", "3"="firebrick", "4"="tan3")) + 
+  scale_fill_manual(values=c("1"="steelblue", "2"="forestgreen", "3"="firebrick", "4"="tan3", "5"="orange")) + 
   guides(fill=FALSE)
 g  
 g1 = g + theme_ipsum_rc(grid="X", base_family = "Arial") + 
-  scale_x_discrete(labels = c("ACE", "", "", "Amzal", "", "", "Muller", "", "", "New"), 
+  scale_x_discrete(labels = c("INSH", "ACE", "", "", "Amzal", "", "", "Muller", "", "", "New"), 
                    expand=c(0,0.7)) + 
-  scale_y_continuous(expand=c(0.01, 0),  limits = c(0.8, 3.5)) 
+  scale_y_continuous(expand=c(0.01, 0),  limits = c(0.8, 4.5)) 
 g2 = g1 + geom_label(data=dd_text, aes(y=values, x=group, label=label), 
               colour="grey10", fill="white", hjust=1, size=3, vjust="bottom", 
               nudge_x = -0.25, parse=TRUE) 
