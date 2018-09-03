@@ -1,4 +1,4 @@
-p = readRDS("data/exact.rds")
+p = readRDS("data/death1d/exact.rds")
 p = sort(p/sum(p), decreasing = T)
 
 q = seq(0, 1, length.out = 100)
@@ -30,7 +30,7 @@ par(mar=c(3,3,2,1), mgp=c(2,0.4,0), tck=-.01,
 
 plot(seq_len(nrow(values)), values[,1], log="xy",
      ylim=c(1, 500),
-     xlab="J", ylab="k", 
+     xlab="J", ylab=expression(n[up]), 
      panel.first = abline(h=c(1, 5,10, 50, 100, 500), lty=3, col="grey80"), 
      axes=FALSE, frame=FALSE, pch = 21, bg="steelblue", type="l")
 lines(seq_len(nrow(values)), values[,2], lty=2)
@@ -40,7 +40,7 @@ axis(2, c(1, 5,10, 50, 100, 500), tick=FALSE,  col.axis="grey50", cex.axis = 0.8
 axis(1, c(1, 2, 5, 10, 20, 50, 100), tick=F,  col.axis="grey50", cex.axis = 0.8)
 text(35, 100,expression(paste(alpha, "=0.5")), cex=0.9)
 text(45, 40,expression(paste(alpha, "=0.25")), cex=0.9)
-text(55, 20,expression(paste(alpha, "=0.125")), cex=0.9)
+text(55, 19,expression(paste(alpha, "=0.125")), cex=0.9)
 
 #title("", adj=1, 
 #      cex.main=0.9, font.main=2, col.main="black")

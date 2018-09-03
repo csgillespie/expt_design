@@ -1,39 +1,32 @@
-library(ggplot2)
-library(hrbrthemes)                       
+set.seed(1)
+source("15d/initialise.R")
 
-get_data = function(fname, type, N = NULL) {
-  o = readRDS(fname)
-  o = o[o$V1 == 0 & o$n > 2,]# Bug re-running
-  o$type = type
-  o = o[order(-o$util),]  
-  o$id = 1:nrow(o)
-  o$se = sqrt((o$util2 - o$util^2)/(o$n-1))/sqrt(o$n)
-  o$mean = o$util
-  if(!is.null(N)) o = o[1:min(N,nrow(o)), ]
-  o
+x = seq_len(15) - 0.5
+x_tweak = seq(6.5, 8.5, by = 0.01)
+util = util_true = numeric(length(x_tweak))
+
+for (i in 1:length(x_tweak)) {
+  x[8] = x_tweak[i]
+  util[i] = get_utility(x)
+  util_true[i] = get_utility(x, 0)
 }
 
-N = 100
-o1 = get_data(fname = "data/output4/aphids1.Rds", type="m = 0", N)
-o2 = get_data(fname = "data/output4/aphids2.Rds", type="m = 1", N)
-o3 = get_data(fname = "data/output4/aphids3.Rds", type="m = 2", N)
-o4 = get_data(fname = "data/output4/aphids4.Rds", type="m = 3", N)
+fname = "graphics/figure6.pdf"
+pdf(fname, width = 6, height = 4)
+par(mar = c(3,3.6,2,1), mgp = c(2,0.4,0), tck = -.01,
+    cex.axis = 0.9, las = 1, yaxs = 'i')
 
-o = rbind(o1, o2)
-o = rbind(o, o3)
-o = rbind(o, o4)
-#o = rbind(o, o5)
-#o = rbind(o, o6)
+plot(x_tweak, util, pch = 21, bg = "grey", xlab = expression(d[8]), 
+     axes = FALSE, frame = FALSE, ylab = "Utility", 
+     panel.first = abline(h = c(0.9, 0.95, 1.0,1.05, 1.1), lty = 3, col = "grey80"), 
+     ylim = c(0.89, 1.1))
+     
+lines(x_tweak, util_true, lwd = 2, col = "steelblue")
 
+axis(1, c(6.5, 7.0, 7.5,8.0,  8.5), 
+     tick = FALSE,  col.axis = "grey50", cex.axis = 0.8)
+axis(2, c(0.9, 1.0, 1.1), 
+     c(0.9, "1.0", 1.1), tick = FALSE,  col.axis = "grey50", cex.axis = 0.8)
 
-g = ggplot(o) + 
-  geom_errorbar(aes(x=id, ymin=mean-2*se, ymax=mean+2*se), size=0.1) + 
-  geom_point(aes(id, mean), size=0.5) + 
-  theme_ipsum() + 
-  labs(y="u(d)", x=NULL)  + 
-  facet_grid(~type)
-g
-res = 900
-png("graphics/figure6.png", width=8*res, height=5*res, res=res)
-print(g)
 dev.off()
+system(paste("pdfcrop", fname))

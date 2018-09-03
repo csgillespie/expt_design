@@ -1,83 +1,72 @@
 library(ggplot2)
-library("aws.s3")
+library(hrbrthemes)                       
 
-MAX_X = 100; MAX_Y = 800
-x = seq(0, 1, length.out=MAX_X+1)
-y = seq(0, 12, length.out=MAX_Y+1)
-
-packageVersion("aws.s3")
-bucketlist()
-bucket = get_bucket(bucket = 'bayesianexpdesign')
-(bucket_elements = unlist(lapply(bucket, `[[`, "Key")))
-
-
-l = lapply(bucket_elements, s3readRDS,  bucket = "bayesianexpdesign")
-## Only 24K
-initial = as.data.frame(l[[1]])
-initial$x = x[initial$V1]
-initial$y = y[initial$V2]
-
-dd = l[[1]];
-dd[dd[,1] ==24 & dd[,2] == 754,]
-for(i in seq_along(l)[-1]){
-  message(i, " : ", sum(l[[i]][,3]))
-  dd_tmp = l[[i]]
-  dd[,4] = (dd[,4]*dd[,3] + dd_tmp[,4]*dd_tmp[,3])/(dd[,3] + dd_tmp[,3])
-  dd[,5] = (dd[,5]*dd[,3] + dd_tmp[,5]*dd_tmp[,3])/(dd[,3] + dd_tmp[,3])
-  #dd[is.nan(dd[,4]),4] = 0
-  dd[,6] = max(dd[,6], dd_tmp[,6])
-  dd[,3] = dd[,3] + dd_tmp[,3]
-  dd[dd[,1] ==24 & dd[,2] == 754,]
+get_data = function(fname, type, N = NULL) {
+  o = readRDS(fname)
+  o = o[o$n > 2,]# Bug re-running
+  o$type = type
+  o = o[order(-o$util),]  
+  o$id = 1:nrow(o)
+  o$se = sqrt((o$util2 - o$util^2)/(o$n-1))/sqrt(o$n)
+  o$mean = o$util
+  if(!is.null(N)) o = o[1:min(N,nrow(o)), ]
+  o
 }
-dd[is.nan(dd[,4]),4] = 0
-dd = as.data.frame(dd)
-dd$x = x[dd$V1]
-dd$y = y[dd$V2]
 
-nr = sample(1:nrow(initial), size = 2*nrow(initial), replace=TRUE, prob=initial[,4]^5)
-initial_samp = initial[nr,]
-# Contour plot
-g1 = ggplot(initial_samp, aes(x, y)) + stat_density2d(bins=10) + 
-  xlim(c(0, 1)) + ylim(c(0, 12.5)) + 
-  theme_bw() + xlab("a") + ylab("b") + 
-  ggtitle("Utility surface") + annotate("point", x=0.73, y=3.1, cex=2) + 
-  annotate("text", x=0.75, y=3.8, label="Ryan et al") +
-  annotate("text", x=01, y=12, label = "(a)")
-g1
+N = 100
+o2 = get_data(fname = "data/aphids/output2/aphids8.Rds", type="One design point", N)
+o3 = get_data(fname = "data/aphids/output3/aphids8.Rds", type="Two design points", N)
+o4 = get_data(fname = "data/aphids/output4/aphids8.Rds", type="Three design points", N)
+o5 = get_data(fname = "data/aphids/output5/aphids8.Rds", type="Four design points", N)
+o5[2,]
 
-## Visiting
-g2 = ggplot(initial, aes(x, y)) + 
-  geom_raster(aes(fill=V3>0)) + 
-  theme_bw() + xlab("a") + ylab("b") + 
-  scale_x_continuous(expand=c(0, 0), limit=c(0, 1)) +
-  scale_y_continuous(expand=c(0, 0), limit=c(0, 12)) + 
-  scale_fill_manual(values = c("TRUE"="steelblue", "FALSE"="white"), guide=FALSE) + 
-  ggtitle("Visited designs") + 
-  annotate("text", x=0.95, y=11.2, label = "(b)")
+col_names = c("n", "mean", "se", "n", "type", "id")
+o = rbind(o2[, col_names], o3[, col_names])
+o = rbind(o, o4[,col_names])
+o = rbind(o, o5[,col_names])
+
+
+err = data.frame(se = o$se, mean = o$mean, 
+                 n = o$n, 
+                 type=o$type, id = o$id, stringsAsFactors = F)
+
+err$type = factor(err$type, levels  = 
+                    c("One design point", "Two design points", "Three design points", "Four design points"))
+
+
+head(o2)
+ggplot(subset(o2, type=="One design point")) + 
+  geom_point(aes(V2, util), size=0.5) 
+
+g2 = ggplot(subset(err, type=="Two design points")) + 
+  geom_errorbar(aes(x=id, ymin=mean-2*se, ymax=mean+2*se), size=0.1) + 
+  geom_point(aes(id, mean), size=0.5) + 
+  theme_ipsum() + 
+  labs(y="u(d)", x=NULL, title="Two design points") 
 g2
+g3 = ggplot(subset(err, type=="Three design points")) + 
+  geom_errorbar(aes(x=id, ymin=mean-2*se, ymax=mean+2*se), size=0.1) + 
+  geom_point(aes(id, mean), size=0.5) + 
+  theme_ipsum() + 
+  labs(y="u(d)", x=NULL, title="Three design points") 
 
+g4 = ggplot(subset(err, type=="Four design points")) + 
+  geom_errorbar(aes(x=id, ymin=mean-2*se, ymax=mean+2*se), size=0.1) + 
+  geom_point(aes(id, mean), size=0.5) + 
+  theme_ipsum() + 
+  labs(y="u(d)", x=NULL, title="Four design points") 
 
-initial_o = initial[initial[,3] > 3,]
-initial_o = initial_o[order(-initial_o$V4)[1:100],]
-g3 = ggplot(initial_o) + 
-  geom_point(aes(1:100, V4)) + 
-  geom_errorbar(aes(1:100, ymin = V4 - 2*(V5- V4^2), ymax = V4 + 2*(V5- V4^2) )) + 
-  ylim(c(1, 1.4)) + theme_bw() + xlab(NULL) + ylab("U(d)") + 
-  ggtitle("Top 100 designs (24K utility evaluations)") + 
-  annotate("text", x=100, y=1.4, label = "(c)")
-g3
-
-dd_o = dd[dd[,3] > 3,]
-dd_o = dd_o[order(-dd_o$V4)[1:100],]
-g4 = ggplot(dd_o) + geom_point(aes(1:100, V4)) + 
-  geom_errorbar(aes(1:100, ymin = V4 - 2*(V5- V4^2), ymax = V4 + 2*(V5- V4^2) )) + 
-  ylim(c(1, 1.4)) + theme_bw() + xlab(NULL) + ylab("U(d)") + 
-  ggtitle("Top 100 designs (56K utility evaluations)") + 
-  annotate("text", x=100, y=1.4, label = "(d)")
-g4
-
+g = ggplot(err) + 
+  geom_errorbar(aes(x=id, ymin=mean-2*se, ymax=mean+2*se), size=0.1) + 
+  geom_point(aes(id, mean), size=0.5) + 
+  facet_wrap(~type, scale="free_y") + 
+  theme_ipsum_rc() + 
+  labs(y="u(d)", x=NULL) 
+g
 fname = "graphics/figure8.pdf"
 pdf(fname, width=8, height=6)
-gridExtra::grid.arrange(g1, g2, g3, g4, ncol=2)
+suppressMessages(extrafont::loadfonts())
+print(g)
 dev.off()
+
 system(paste("pdfcrop", fname))

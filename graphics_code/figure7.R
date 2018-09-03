@@ -1,65 +1,67 @@
-get_y = function(t, D, T_inf, ke, V, sigma2){
-  eps_t = rnorm(1, 0, sqrt(sigma2))
-  y = D/T_inf*1/(ke*V)*(1 + eps_t)
-  if(t<=T_inf) { 
-    y = y*(1- exp(-ke*t))
-  } else {
-    y = y*(1- exp(-ke*T_inf))*exp(-ke*(t-T_inf))
-  }
-  y
+source("graphics_code/aphids_simulation.R")
+set.seed(1)
+mu = c(0.246, 0.000134)
+lambda_sd = 0.00079*10; mu_sd = 0.000002*10;
+cov = 0.356 * lambda_sd * mu_sd
+cov_mat = matrix(c(lambda_sd^2, cov, cov,  mu_sd^2), ncol=2)
+
+par = MASS::mvrnorm(100, mu, cov_mat)
+sims = apply(par, 1, function(i) gillespie(lambda=i[1], mu=i[2], maxtime=50))
+
+get_data = function(fname, type, N = NULL) {
+  o = readRDS(fname)
+  o = o[o$n > 2,]# Bug re-running
+  o$type = type
+  o = o[order(-o$util),]  
+  o$id = 1:nrow(o)
+  o$se = sqrt((o$util2 - o$util^2)/(o$n-1))/sqrt(o$n)
+  o$mean = o$util
+  if(!is.null(N)) o = o[1:min(N,nrow(o)), ]
+  o
 }
 
-get_pars = function(log = FALSE) {
-  pars = MASS::mvrnorm(1, mu = c(-3.26, 8.99), 
-                       Sigma = matrix(c(0.0071, -0.0057, -0.0057, 0.0080), ncol=2))
-  if(!log) pars = exp(pars)
-  pars  
-}
+N = 1
+o2 = get_data(fname = "data/aphids/output2/aphids8.Rds", type="One design point", N)
+o3 = get_data(fname = "data/aphids/output3/aphids8.Rds", type="Two design points", N)
+o4 = get_data(fname = "data/aphids/output4/aphids8.Rds", type="Three design points", N)
+o5 = get_data(fname = "data/aphids/output5/aphids8.Rds", type="Four design points", N)
 
-get_data = function(ke, V, sigma2, x=0:400, D=500, T_inf=30){
-  y = sapply(x, get_y, D, T_inf, ke, V, sigma2)  
-  as.vector(y)
-}
+o2 = unlist(o2[,c("V1", "V2")])
+o3 = unlist(o3[, c("V1", "V2", "V3")])
+o4 = unlist(o4[, c("V1", "V2", "V3", "V4")])
+o5 = unlist(o5[, c("V1", "V2", "V3", "V4", "V5")])
 
-N = 100
-l = list()
-for(i in 1:N) {
-  pars  = get_pars(FALSE)
-  pars[3] = rnorm(1, 0.01, sqrt(10^(-5)))
-  l[[i]] = get_data(pars[1], pars[2], pars[3])
-}
-
-col = rgb(85,130,169, alpha=150, maxColorValue=255)
-mypalette(1)
-s = 1/11
-ryan_design = c(0, qbeta(c(s,2*s, 3*s, 4*s, 5*s, 6*s, 7*s, 8*s, 9*s, 10*s),0.73,3.1))* 720
-(csg_design = c(0, qbeta(c(s,2*s, 3*s, 4*s, 5*s, 6*s, 7*s, 8*s, 9*s, 10*s),0.25,9))* 720)
-
+#mypalette(1)
 fname = "graphics/figure7.pdf"
-pdf(fname, width=8, height=5)
-par(mar=c(3,3,2,1), mgp=c(2,0.4,0), tck=-.01,
-    cex.axis=0.9, las=1, xaxs='i',yaxs='i')
+pdf(fname, width=6, height=4)
+par(mar=c(3,3,2,1), 
+    mgp=c(2,0.4,0), tck=-.01,
+    cex.axis=0.9, las=1)
 
-plot(0:400, l[[1]]*1000, col=col, type="n", ylim=c(-10, 60), xlim=c(-5, 400), 
-     xlab="Time (mins)", ylab = "Concentration", axes=FALSE, frame=FALSE, 
-     panel.first = abline(h=seq(0, 60, 20), lty=3, col="grey80"))
-for(i in seq_along(l)) {
-  lines(0:400, l[[i]]*1000, col=rgb(200, 200, 200, 50, maxColorValue = 255))
+plot(0, 0, frame.plot = FALSE, axes=FALSE, ylim=c(-150, 1500), xlim=c(0, 50), type="n", 
+     xlab="Time (days)", ylab="Aphid population", 
+     panel.first = abline(h=c(0, 500, 1000, 1500), lty=3, col="grey80"))
+
+i = 4
+for(i in 1:length(sims)) {
+  s = sims[[i]]
+  lines(s$Time, s$N, col=rgb(150, 150, 150, alpha=60,maxColorValue=255))
 }
-axis(2, seq(0, 60, 20), tick=FALSE,  col.axis="grey50", cex.axis = 0.8)
-axis(1, seq(0, 400, 100), tick=F,  col.axis="grey50", cex.axis = 0.8)
-# title("PK (100 simulations)", adj=1, 
-#       cex.main=0.9, font.main=2, col.main="black")
 
-pars = c(exp(-3.26), exp(8.99), 0.01)
-lines(seq(0, 400, length.out=1000), 
-      get_data(pars[1], pars[2], 0, x= seq(0, 400, length.out=1000))*1000, 
-      col="steelblue", lwd=2)
-text(200,2, "Mean curve", col="steelblue")
-points(ryan_design, rep(-3, 11), pch=21, bg=1)
-points(csg_design, rep(-6, 11), pch=21, bg=2)
+y_values = seq(0, -190, length.out=4)#c(-5, -55, -95, -135)
 
-text(340, -3, "Ryan design", pos = 4, cex=0.9, col=1)
-text(340, -6, "New design", pos = 4, cex=0.9, col=2)
+segments(0, y_values[1], o2[length(o2)], y_values[1], col="grey80", lwd=2)
+segments(0, y_values[2], o3[length(o3)], y_values[2], col="grey80", lwd=2)
+segments(0, y_values[3], o4[length(o4)], y_values[3], col="grey80", lwd=2)
+segments(0, y_values[4], o5[length(o5)], y_values[4], col="grey80", lwd=2)
+
+points(o2, rep(y_values[1], length(o2)), pch=21, bg="black")
+points(o3, rep(y_values[2], length(o3)), pch=21, bg="black")
+points(o4, rep(y_values[3], length(o4)), pch=21, bg="black")
+points(o5, rep(y_values[4], length(o5)), pch=21, bg="black")
+
+axis(1, tick = F)
+axis(2, at = c(0, 500, 1000, 1500), tick=FALSE)
 dev.off()
 system(paste("pdfcrop", fname))
+

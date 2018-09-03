@@ -1,4 +1,4 @@
-res = readRDS("data/death_gil_single.rds")
+res = readRDS("data/death1d/death_gil_single.rds")
 unlist(lapply(res, function(i) max(i[,1])))
 fname = "graphics/figure1.pdf"
 pdf(fname, width=6, height=4)
@@ -14,7 +14,7 @@ plot(res[[1]][,2]/100, res[[1]][,1], ylim=c(0, 60), xlim=c(0, 10),
      axes=FALSE, frame=FALSE, pch=21, col=NA, bg=bg, cex = 0.7)
 axis(2, seq(0, 60, 20), tick=FALSE,  col.axis="grey10", cex.axis = 0.8)
 axis(1, seq(0, 10, 2), tick=F,  col.axis="grey10", cex.axis = 0.8)
-title("m = 0", adj=0.5, 
+title("Initialisation", adj=0.5, 
       cex.main=0.9, font.main=2, col.main="black")
 text(1.61, 57, "Optimal design", col="grey10", pos = 4, cex=0.8)
 

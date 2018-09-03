@@ -37,7 +37,7 @@ discrete_trunc_sample <- function(current_d, minmaxT, sd_T, stepsize, m, mindiff
 
 insh_estimate = function(seed = NULL) {
   if(!is.null(seed)) set.seed(seed)
-  set.seed(11)
+  
   # Range for observation times
   minmaxT <- c(0, 10)
   
@@ -45,10 +45,15 @@ insh_estimate = function(seed = NULL) {
   ntimes <- 1
   
   # INSH relevant inputs for each number of observations (as in "An Induced Natural Selection Heuristic for...", Price et al. (2018))
-  W=8; # Number of waves to run INSH
-  m=c(rep(3,W/2), rep(5,W/2)); # Number of designs to sample around each retained design, at each wave
-  ntokeep = c(rep(10,W/2), rep(6,W/2)); # Number of designs to keep at each wave
-  n_init=20; # Number of designs to randomly allocate in first wave
+  # W=8; # Number of waves to run INSH
+  # m=c(rep(3,W/2), rep(5,W/2)); # Number of designs to sample around each retained design, at each wave
+  # ntokeep = c(rep(10,W/2), rep(6,W/2)); # Number of designs to keep at each wave
+  # n_init=20; # Number of designs to randomly allocate in first wave
+  
+  W=5;
+  m = rep(3,W);  
+  ntokeep = rep(8,W);
+  n_init=24;
   
   # Standard deviation of perturbation kernel
   pert_sd <- 0.1
@@ -74,10 +79,9 @@ insh_estimate = function(seed = NULL) {
   registerDoParallel(cl)
   w = 1
   tot = 0
+  util <- vector("numeric", length = nrow(current_wave_designs))
   for (w in 1:W){
     # Evaluate utility for each of the designs in the current wave using utilcomp15sig from acebayes package
-    util <- vector("numeric", length = nrow(current_wave_designs))
-    
     d = 1
     util <- foreach(d=1:nrow(current_wave_designs), .packages = "acebayes", .combine = c,
                     .export = c("simulate", "get_utility")) %dopar% {
@@ -85,9 +89,9 @@ insh_estimate = function(seed = NULL) {
       obs_t = max(obs_t, 0.01)
       obs_t = min(obs_t, 10)
       
-      theta_prop = rlnorm(1, -0.005, sqrt(0.01))
-      x = simulate(theta_prop, obs_t)
-      get_utility(x, obs_t * 100)
+      theta_prop = rlnorm(150, -0.005, sqrt(0.01))
+      x = sapply(theta_prop, simulate,  obs_t)
+      mean(sapply(x, get_utility, obs_t * 100))
     }
     tot = tot + length(util)
     
@@ -122,8 +126,14 @@ insh_estimate = function(seed = NULL) {
       discrete_trunc_sample(update_designs[r,], minmaxT, sample_sd, gridsize, m[w], min_difference)
     }
   }
+  message(tot)
   opt_loc <- which.max(keep_all[,ntimes+1])
   keep_all[opt_loc,1:ntimes]
 }
-x = vapply(1:500, function(i) insh_estimate(i), FUN.VALUE = double(1) )
+insh_estimate()
+
+x = vapply(1:500, function(i) insh_estimate(), FUN.VALUE = double(1) )
+beepr::beep(3)
+boxplot(x)
+
 saveRDS(x, file= "data/death_insh.rds")
